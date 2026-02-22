@@ -96,6 +96,10 @@ Key variables in `terraform/terraform.tfvars`:
 | `lke_node_type` | `g6-standard-2` | Node size (4 GB shared) |
 | `lke_node_count` | `3` | Worker node count |
 
+### 3.5. Install terraform (if not installed)
+
+Follow [hashicorp install instructions](https://developer.hashicorp.com/terraform/install) for your platform
+
 ### 4. Apply Terraform configuration
 
 Provision the LKE cluster:
@@ -214,33 +218,36 @@ Open http://localhost:16686, select service `exchange-agent`, and click **Find T
 
 For local development without cloud infrastructure:
 
-### 1. Configure environment
+### First Time Setup
+
+#### 1. Configure environment
+
+```bash
+git clone https://github.com/DataWorksAI-com/MbtaWinter2026
+cd MbtaWinter2026
+```
+
+#### 2. Configure environment
 
 ```bash
 cp .env.example .env
-# Edit .env — add your OPENAI_API_KEY and MBTA_API_KEY
 ```
 
-### 2. Start all services
+#### 3. Add API keys
+
+Edit `.env` - add your `OPENAI_API_KEY` and `MBTA_API_KEY`
+
+#### 4. Build and start the the services
 
 ```bash
-docker compose up --build
+docker compose up -d --build
 ```
 
-### 3. Access the system
+#### 5. Register agents
 
-| Service | URL |
-|---------|-----|
-| Frontend (Chat UI) | http://localhost:3000 |
-| Exchange API | http://localhost:8100 |
-| Jaeger (Traces) | http://localhost:16686 |
-| Grafana (Metrics) | http://localhost:3001 |
-| NANDA Registry | http://localhost:6900 |
-
-### 4. Register agents (first time only)
+Wait for services to start, then register agents
 
 ```bash
-# Wait for services to start, then register agents
 curl -s -X POST http://localhost:6900/register \
   -H "Content-Type: application/json" \
   -d '{"agent_id":"mbta-alerts","name":"MBTA Alerts Agent","agent_url":"http://alerts-agent:8001","status":"alive"}'
@@ -252,10 +259,27 @@ curl -s -X POST http://localhost:6900/register \
 curl -s -X POST http://localhost:6900/register \
   -H "Content-Type: application/json" \
   -d '{"agent_id":"mbta-stopfinder","name":"MBTA StopFinder Agent","agent_url":"http://stopfinder-agent:8003","status":"alive"}'
-
 ```
 
-### 5. Stop services
+### Regular Usage
+
+#### 1. Start all services
+
+```bash
+docker compose up -d
+```
+
+#### 2. Access the system
+
+| Service | URL |
+|---------|-----|
+| Frontend (Chat UI) | http://localhost:3000 |
+| Exchange API | http://localhost:8100 |
+| Jaeger (Traces) | http://localhost:16686 |
+| Grafana (Metrics) | http://localhost:3001 |
+| NANDA Registry | http://localhost:6900 |
+
+#### 3. Stop services
 
 ```bash
 docker compose down          # Stop containers
