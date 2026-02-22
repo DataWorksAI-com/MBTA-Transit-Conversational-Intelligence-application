@@ -50,6 +50,10 @@ The project supports two deployment modes:
 └─────────────────────────────────────────────────────┘
 ```
 
+## Deployment
+
+![MBTA System Deployment Diagram](deployment.png)
+
 ## Prerequisites
 
 - [Linode/Akamai account](https://cloud.linode.com/) with API token
