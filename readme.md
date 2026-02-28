@@ -20,7 +20,7 @@ The project supports two deployment modes:
 
 - **Backend:** Python 3.11, FastAPI
 - **Orchestration:** LangGraph, LangChain
-- **AI/ML:** OpenAI GPT-4o-mini (routing, synthesis, extraction)
+- **AI/ML:** Anthropic Claude (primary) with OpenAI fallback
 - **Protocols:** MCP, A2A, SLIM (Cisco agntcy-app-sdk, a2a-sdk)
 - **Observability:** OpenTelemetry, Jaeger, Grafana, ClickHouse
 - **Deployment:** Terraform → Linode Kubernetes Engine (LKE)
@@ -37,7 +37,7 @@ The project supports two deployment modes:
               ┌────────┘          └─────────┐
               ▼                             ▼
        ┌────────────┐            ┌───────────────────┐
-       │ MCP Client │            │ SLIM A2A Transport │
+       │ MCP Client │            │ SLIM A2A Transport│
        │ (stdio)    │            │                   │
        │ 32 tools   │            │ Alerts    (50051) │
        │ ~400ms     │            │ Planner   (50052) │
@@ -50,14 +50,61 @@ The project supports two deployment modes:
 └─────────────────────────────────────────────────────┘
 ```
 
+## Deployment
+
+![MBTA System Deployment Diagram](deployment.png)
+
 ## Prerequisites
 
 - [Linode/Akamai account](https://cloud.linode.com/) with API token
+- [Anthropic API key](https://console.anthropic.com/) (primary LLM)
 - [OpenAI API key](https://platform.openai.com/)
 - [MBTA API key](https://api-v3.mbta.com/)
 - [Terraform](https://developer.hashicorp.com/terraform/install) (≥ 1.0)
 - [kubectl](https://kubernetes.io/docs/tasks/tools/)
 - [Docker](https://docs.docker.com/get-docker/)
+
+---
+
+## What Changed From the Original (Anthropic Claude Integration)
+
+The original project used OpenAI GPT-4o-mini exclusively. The following changes were made to integrate Anthropic Claude as the primary LLM provider, with OpenAI kept as an optional fallback.
+
+### New File
+
+**`src/exchange_agent/llm_client.py`** — A provider-agnostic LLM wrapper. Auto-detects which provider to use based on which API keys are present. Supports both Anthropic and OpenAI through a single `.complete()` interface so the rest of the codebase doesn't need to know which provider is active.
+
+### Modified Files
+
+| File | Change |
+|------|--------|
+| `src/exchange_agent/exchange_server.py` | Removed hardcoded `openai_client` calls; replaced with `llm.complete()` from `llm_client.py`. Fixed import path. |
+| `src/exchange_agent/stategraph_orchestrator.py` | Same OpenAI → `llm.complete()` replacement. Also removed the `alive=False` filter that was silently blocking agent discovery — agents were registering but never being found. |
+| `src/agents/planner/main.py` | Replaced OpenAI client with `llm_client`. Added `find_transfer_routes()`: tries direct routes first, then searches for a one-transfer connection by finding a stop where the two route networks intersect (e.g. MIT → Northeastern: Red Line to Park Street, transfer to Green Line). |
+| `k8s/secrets.yaml` | Added `ANTHROPIC_API_KEY` field. |
+| `k8s/configmap.yaml` | Added `LLM_PROVIDER`, `ANTHROPIC_MODEL`, `OPENAI_MODEL` env vars. |
+| `k8s/register-agents-job.yaml` | Added a `PUT /status` call after each agent registration to explicitly mark agents `alive=true`. The NANDA registry defaults new registrations to `alive=false`, which caused agents to be invisible to the orchestrator. |
+| `requirements.txt` | Added `anthropic>=0.25.0`. |
+
+### LLM Provider Configuration
+
+The system uses a provider-agnostic client (`src/exchange_agent/llm_client.py`). Configure via environment variables in `k8s/configmap.yaml` and `k8s/secrets.yaml`:
+
+| Env Var | Description |
+|---------|-------------|
+| `ANTHROPIC_API_KEY` | Anthropic API key — set this to use Claude (recommended) |
+| `LLM_PROVIDER` | Optional override: `anthropic` or `openai`. Auto-detects from available keys if not set. |
+| `ANTHROPIC_MODEL` | Model to use. Default: `claude-sonnet-4-20250514` |
+| `OPENAI_API_KEY` | Optional fallback if no Anthropic key is present |
+| `OPENAI_MODEL` | Model to use if OpenAI is selected. Default: `gpt-4o-mini` |
+
+### Known Race Condition on First Deploy
+
+The exchange agent validates registry connectivity at startup. If the registry pod isn't ready yet when exchange starts, the A2A path gets permanently disabled for that pod's lifetime. **Fix:** restart exchange after everything is running:
+
+```bash
+kubectl -n mbta rollout restart deployment/exchange
+```
 
 ---
 
@@ -123,7 +170,7 @@ The kubeconfig is automatically written to `terraform/kubeconfig.yaml`.
 
 macOS:
 ```bash
-export KUBECONFIG=$(pwd)/kubeconfig.yaml
+export KUBECONFIG=$(pwd)/terraform/kubeconfig.yaml
 kubectl get nodes
 ```
 Windows:
@@ -133,6 +180,8 @@ kubectl get nodes
 ```
 You should see your LKE worker nodes in `Ready` state.
 
+> **Tip:** Add the export to your `~/.zshrc` or `~/.bashrc` so it persists across terminal sessions.
+
 ### 7. Create Kubernetes secrets
 
 ```bash
@@ -140,11 +189,11 @@ cd ..
 cp k8s/secrets.example.yaml k8s/secrets.yaml
 ```
 
-Edit `k8s/secrets.yaml` and replace the placeholder values with your base64-encoded API keys:
+Edit `k8s/secrets.yaml` and replace placeholders with your **base64-encoded** API keys:
 
 macOS:
 ```bash
-echo -n "your-openai-api-key" | base64
+echo -n "your-anthropic-api-key" | base64
 echo -n "your-mbta-api-key" | base64
 ```
 Windows:
@@ -152,6 +201,8 @@ Windows:
 [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes("your-openai-api-key"))
 [Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes("your-mbta-api-key"))
 ```
+
+> **Important:** Always use `echo -n` (no trailing newline) or the key will be invalid.
 
 ### 8. Build and push container images
 
@@ -199,7 +250,32 @@ This will:
 4. Register agents in the NANDA registry
 5. Expose the frontend via a LoadBalancer
 
-### 10. Verify deployment
+### 10. Fix the startup race condition
+
+After deploy completes, restart the exchange so it picks up the now-ready registry:
+
+```bash
+kubectl -n mbta rollout restart deployment/exchange
+```
+
+Wait ~15 seconds, then confirm the A2A path is available:
+
+```bash
+kubectl -n mbta logs deploy/exchange --tail=20
+# Should show: ✅ Registry validation passed - A2A path ready
+```
+
+If it still fails, re-register agents and restart again:
+
+```bash
+kubectl -n mbta delete job register-agents
+kubectl apply -f k8s/register-agents-job.yaml
+kubectl -n mbta logs job/register-agents -f
+kubectl -n mbta rollout restart deployment/exchange
+```
+
+
+### 11. Verify deployment
 
 ```bash
 # Check all pods are running
@@ -210,17 +286,29 @@ kubectl -n mbta get svc frontend \
   -o jsonpath='{.status.loadBalancer.ingress[0].ip}'
 ```
 
-### 11. Test the system
+### 12. Test the system
+
+Open `http://<FRONTEND_IP>:3000` in your browser and type a query in the chat interface.
+
+To test via curl (port-forward exchange first):
 
 macOS:
 ```bash
-FRONTEND_IP=$(kubectl -n mbta get svc frontend -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
-```
+kubectl -n mbta port-forward svc/exchange 8100:8100 &
+sleep 5
 
+# Simple query (MCP fast path ~400ms)
+curl -X POST http://localhost:8100/chat \
+  -H "Content-Type: application/json" \
+  -d '{"query": "Red Line delays?"}'
+```
 Windows:
 ```PowerShell
-$FRONTEND_IP = kubectl -n mbta get svc frontend -o jsonpath="{.status.loadBalancer.ingress[0].ip}"
+curl -Method POST http://$FRONTEND_IP`:8100/chat `
+  -Headers @{"Content-Type"="application/json"} `
+  -Body '{"query": "Red Line delays?"}'
 ```
+
 #### Health check
 
 macOS:
@@ -251,9 +339,9 @@ curl -Method POST http://$FRONTEND_IP`:8100/chat `
 
 macOS:
 ```bash
-curl -X POST http://exchange:8100/chat \
+curl -X POST http://localhost:8100/chat \
   -H "Content-Type: application/json" \
-  -d '{"query": "How do I get from Harvard to MIT?"}'
+  -d '{"query": "How do I get from Northeastern to MIT?"}'
 ```
 Windows:
 ```PowerShell
@@ -262,9 +350,9 @@ curl -Method POST http://$FRONTEND_IP`:8100/chat `
   -Body '{"query": "How do I get from Harvard to MIT?"}'
 ```
 
-Open `http://<FRONTEND_IP>:3000` in your browser to use the chat interface.
+> **Note:** Start the port-forward before running curl. If you run both in the same command, curl may fire before the tunnel is established.
 
-### 12. View distributed traces
+### 13. View distributed traces
 
 Port-forward Jaeger to your machine:
 
@@ -284,7 +372,7 @@ For local development without cloud infrastructure:
 
 ```bash
 cp .env.example .env
-# Edit .env — add your OPENAI_API_KEY and MBTA_API_KEY
+# Edit .env — add your ANTHROPIC_API_KEY (or OPENAI_API_KEY) and MBTA_API_KEY
 ```
 
 ### 2. Start all services
@@ -352,72 +440,43 @@ docker compose down -v       # Stop and remove volumes
 ```
 MbtaWinter2026/
 ├── src/
-│   ├── exchange_agent/              # Protocol gateway + routing
-│   │   ├── exchange_server.py       # FastAPI server (port 8100)
-│   │   ├── mcp_client.py            # MCP stdio client
-│   │   ├── slim_client.py           # SLIM transport client
-│   │   └── stategraph_orchestrator.py # LangGraph A2A orchestration
-│   ├── agents/                      # A2A specialized agents
-│   │   ├── alerts/                  # Service alerts (8001 / 50051)
-│   │   ├── planner/                 # Trip planning (8002 / 50052)
-│   │   └── stopfinder/              # Stop search (8003 / 50053)
-│   ├── frontend/                    # Chat UI (port 3000)
-│   │   ├── chat_server.py
-│   │   └── static/
-│   ├── registry/                    # NANDA agent registry (port 6900)
-│   │   ├── registry.py              # Flask registry server
-│   │   ├── agent_facts_server.py    # Agent facts API
-│   │   ├── requirements.txt         # Registry-specific deps
-│   │   └── static/
-│   │       └── registry-ui.html     # Dashboard UI
-│   └── observability/               # OTel, metrics, traces
-│       ├── otel_config.py
-│       ├── clickhouse_logger.py
-│       ├── metrics.py
-│       └── traces.py
+│   ├── exchange_agent/
+│   │   ├── exchange_server.py          # FastAPI server (port 8100)
+│   │   ├── llm_client.py               # NEW: provider-agnostic LLM wrapper (Anthropic/OpenAI)
+│   │   ├── mcp_client.py               # MCP stdio client
+│   │   ├── slim_client.py              # SLIM transport client
+│   │   └── stategraph_orchestrator.py  # LangGraph A2A orchestration
+│   ├── agents/
+│   │   ├── alerts/                     # Service alerts (8001 / 50051)
+│   │   ├── planner/                    # Trip planning (8002 / 50052) — transfer routing added
+│   │   └── stopfinder/                 # Stop search (8003 / 50053)
+│   ├── frontend/                       # Chat UI (port 3000)
+│   ├── registry/                       # NANDA agent registry (port 6900)
+│   └── observability/                  # OTel, metrics, traces
 │
-├── terraform/                       # LKE infrastructure
-│   ├── main.tf                      # LKE cluster resource
-│   ├── variables.tf                 # Input variables
-│   ├── outputs.tf                   # Cluster outputs
-│   └── terraform.tfvars.example     # Variable template
-│
-├── k8s/                             # Kubernetes manifests
-│   ├── namespace.yaml
-│   ├── configmap.yaml
-│   ├── secrets.example.yaml
-│   ├── exchange.yaml
-│   ├── frontend.yaml
-│   ├── alerts-agent.yaml
-│   ├── planner-agent.yaml
-│   ├── stopfinder-agent.yaml
-│   ├── registry.yaml
-│   ├── observability.yaml
-│   └── register-agents-job.yaml
-│
-├── docker/                          # Dockerfiles + configs
-│   ├── Dockerfile.exchange
-│   ├── Dockerfile.agent
-│   ├── Dockerfile.registry
-│   └── otel-collector-config.yaml
-│
-├── charts/
-│   └── workload.example.yaml        # App Platform workload template
-│
-├── docker-compose.yaml              # Local development
-├── deploy.sh                        # Build/push/deploy helper
-├── requirements.txt                 # Python dependencies
-├── .env.example                     # Environment variable template
-└── .gitignore
+├── terraform/                          # LKE infrastructure
+├── k8s/                                # Kubernetes manifests
+│   ├── configmap.yaml                  # Now includes LLM_PROVIDER, ANTHROPIC_MODEL, OPENAI_MODEL
+│   ├── secrets.yaml                    # Now includes ANTHROPIC_API_KEY
+│   ├── register-agents-job.yaml        # Now marks agents alive after registering
+│   └── ...
+├── docker-compose.yaml
+├── deploy.sh
+├── requirements.txt                    # Now includes anthropic>=0.25.0
+└── .env.example
 ```
 
-## Configuration
+---
 
-The system uses environment variables for all configuration. Key variables:
+## Configuration Reference
 
 | Variable | Service | Description |
 |----------|---------|-------------|
-| `OPENAI_API_KEY` | Exchange, Planner | OpenAI API key |
+| `ANTHROPIC_API_KEY` | Exchange, Planner | Anthropic API key (primary LLM) |
+| `OPENAI_API_KEY` | Exchange, Planner | OpenAI API key (optional fallback) |
+| `LLM_PROVIDER` | Exchange, Planner | Force `anthropic` or `openai`; auto-detected if unset |
+| `ANTHROPIC_MODEL` | Exchange, Planner | Claude model. Default: `claude-sonnet-4-20250514` |
+| `OPENAI_MODEL` | Exchange, Planner | OpenAI model. Default: `gpt-4o-mini` |
 | `MBTA_API_KEY` | All agents | MBTA v3 API key |
 | `USE_SLIM` | Exchange | Enable SLIM transport (`true`/`false`) |
 | `REGISTRY_URL` | Exchange | NANDA registry endpoint |
@@ -425,7 +484,7 @@ The system uses environment variables for all configuration. Key variables:
 | `OTEL_EXPORTER_OTLP_ENDPOINT` | All | OpenTelemetry collector |
 | `CLICKHOUSE_HOST` | Exchange | ClickHouse analytics host |
 
-In Kubernetes, these are managed via ConfigMap (`k8s/configmap.yaml`) and Secrets (`k8s/secrets.yaml`).
+---
 
 ## API Endpoints
 
@@ -453,6 +512,18 @@ In Kubernetes, these are managed via ConfigMap (`k8s/configmap.yaml`) and Secret
 | `GET` | `/health` | Health check |
 | `GET` | `/list` | List registered agents |
 | `POST` | `/register` | Register an agent |
+
+---
+
+## Known Issues & Limitations
+
+- **Transfer routing latency:** `find_transfer_routes()` makes additional MBTA API calls, so responses for transfer routes take 5–10 seconds longer than direct routes.
+- **One transfer only:** Journeys requiring two or more transfers will fall back to a "check mbta.com" message.
+- **ClickHouse logging disabled by default:** The `mbta_logs` database must be created manually after first deploy.
+- **Startup race condition:** Exchange validates registry at boot. If the registry isn't ready yet, the A2A path gets disabled. Fix: `kubectl -n mbta rollout restart deployment/exchange` after all pods are running.
+- **NANDA registry `alive=false` default:** The registry sets `alive=false` on new registrations. The `register-agents-job` works around this with a separate `PUT /status` call after each registration.
+
+---
 
 ## Cleanup
 
@@ -493,6 +564,9 @@ Windows:
 ```PowerShell
 docker images "mbta-*" -q | ForEach-Object { docker rmi $_ }
 ```
+
+---
+
 ## Redeploy (no cleanup)
 
 If the LKE cluster already exists and you did not run cleanup, you can redeploy in-place:
@@ -531,6 +605,49 @@ kubectl apply -f k8s\
 
 ## Troubleshooting
 
+### A2A path unavailable / StateGraph orchestrator not available
+
+This happens when exchange starts before the registry is ready. Fix:
+
+macOS:
+```bash
+kubectl -n mbta rollout restart deployment/exchange
+kubectl -n mbta logs deploy/exchange --tail=20
+# Look for: ✅ Registry validation passed - A2A path ready
+```
+
+If still failing, re-register agents first:
+
+```bash
+kubectl -n mbta delete job register-agents
+kubectl apply -f k8s/register-agents-job.yaml
+kubectl -n mbta logs job/register-agents -f
+kubectl -n mbta rollout restart deployment/exchange
+```
+
+### Trip planning queries returning alerts instead of routes
+
+Indicates the planner agent isn't registered or can't be reached. Check:
+
+macOS:
+```bash
+kubectl -n mbta exec deploy/exchange -- curl -s http://registry:6900/list
+kubectl -n mbta logs deploy/planner-agent -c planner-http --tail=50
+```
+Windows:
+```PowerShell
+kubectl apply -f k8s\
+```
+
+### `namespaces "mbta" not found`
+
+Your `KUBECONFIG` isn't pointing at the LKE cluster:
+
+```bash
+export KUBECONFIG=$(pwd)/terraform/kubeconfig.yaml
+kubectl get nodes  # should show LKE nodes
+```
+
 ### Pods not starting?
 
 ```bash
@@ -542,19 +659,12 @@ kubectl -n mbta logs <pod-name> -c <container-name>
 ### Quick logs for each service
 
 ```bash
-# Exchange + frontend
 kubectl -n mbta logs deploy/exchange --tail=200
 kubectl -n mbta logs deploy/frontend --tail=200
-
-# Agents (HTTP container)
 kubectl -n mbta logs deploy/alerts-agent -c alerts-http --tail=200
 kubectl -n mbta logs deploy/planner-agent -c planner-http --tail=200
 kubectl -n mbta logs deploy/stopfinder-agent -c stopfinder-http --tail=200
-
-# Registry
 kubectl -n mbta logs deploy/registry -c registry --tail=200
-
-# Observability
 kubectl -n mbta logs deploy/otel-collector --tail=200
 kubectl -n mbta logs deploy/jaeger --tail=200
 kubectl -n mbta logs deploy/clickhouse --tail=200
@@ -564,30 +674,30 @@ kubectl -n mbta logs deploy/grafana --tail=200
 ### SLIM agents not responding?
 
 ```bash
-# Check both containers in an agent pod
 kubectl -n mbta logs -l app=alerts-agent -c alerts-http
 kubectl -n mbta logs -l app=alerts-agent -c alerts-slim
-```
-
-### Agents not registered?
-
-```bash
-# Check registry
-kubectl -n mbta exec deploy/exchange -- curl -s http://registry:6900/list
-
-# Re-run registration job
-kubectl -n mbta delete job register-agents
-kubectl apply -f k8s/register-agents-job.yaml
 ```
 
 ### No traces in Jaeger?
 
 ```bash
-# Verify OTEL collector is receiving data
 kubectl -n mbta logs deploy/otel-collector
 ```
 
 ---
+
+## Observability
+
+| Tool | Access |
+|------|--------|
+| **Jaeger (traces)** | `kubectl port-forward svc/jaeger 16686:16686 -n mbta` then open http://localhost:16686 |
+| **Grafana (metrics)** | `kubectl port-forward svc/grafana 3001:3001 -n mbta` then open http://localhost:3001 (admin/admin) |
+| **Exchange logs** | `kubectl -n mbta logs deploy/exchange --tail=50 -f` |
+| **Planner logs** | `kubectl -n mbta logs deploy/planner-agent -c planner-http --tail=50 -f` |
+| **All pods status** | `kubectl -n mbta get pods` |
+
+---
+
 
 ## Links
 
@@ -597,3 +707,4 @@ kubectl -n mbta logs deploy/otel-collector
 - [A2A Protocol](https://github.com/google/a2a)
 - [Akamai LKE Docs](https://www.linode.com/docs/products/compute/kubernetes/)
 - [Terraform Linode Provider](https://registry.terraform.io/providers/linode/linode/latest/docs)
+- [Anthropic API Docs](https://docs.anthropic.com/)
