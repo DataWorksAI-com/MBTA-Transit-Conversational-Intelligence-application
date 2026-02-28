@@ -96,19 +96,23 @@ Key variables in `terraform/terraform.tfvars`:
 | `lke_node_type` | `g6-standard-2` | Node size (4 GB shared) |
 | `lke_node_count` | `3` | Worker node count |
 
-### 3.5. Install terraform (if not installed)
-
-Follow [hashicorp install instructions](https://developer.hashicorp.com/terraform/install) for your platform
-
 ### 4. Apply Terraform configuration
 
 Provision the LKE cluster:
 
+macOS:
 ```bash
 cd terraform
 terraform init
 terraform plan
 terraform apply
+```
+Windows:
+```PowerShell
+cd terraform
+terraform init
+terraform plan -var-file="terraform.tfvars"
+terraform apply -var-file="terraform.tfvars"
 ```
 
 ### 5. Capture Terraform outputs
@@ -121,11 +125,16 @@ The kubeconfig is automatically written to `terraform/kubeconfig.yaml`.
 
 ### 6. Configure kubectl
 
+macOS:
 ```bash
 export KUBECONFIG=$(pwd)/kubeconfig.yaml
 kubectl get nodes
 ```
-
+Windows:
+```PowerShell
+$env:KUBECONFIG="$PWD\kubeconfig.yaml"
+kubectl get nodes
+```
 You should see your LKE worker nodes in `Ready` state.
 
 ### 7. Create Kubernetes secrets
@@ -137,19 +146,38 @@ cp k8s/secrets.example.yaml k8s/secrets.yaml
 
 Edit `k8s/secrets.yaml` and replace the placeholder values with your base64-encoded API keys:
 
+macOS:
 ```bash
 echo -n "your-openai-api-key" | base64
 echo -n "your-mbta-api-key" | base64
+```
+Windows:
+```PowerShell
+[Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes("your-openai-api-key"))
+[Convert]::ToBase64String([Text.Encoding]::UTF8.GetBytes("your-mbta-api-key"))
 ```
 
 ### 8. Build and push container images
 
 Set your container registry (Docker Hub, Harbor, or any OCI registry):
 
+macOS:
 ```bash
 export DOCKER_REGISTRY=docker.io/youruser   # or your Harbor URL
 bash deploy.sh build
 bash deploy.sh push
+```
+Windows:
+```PowerShell
+$env:DOCKER_REGISTRY="docker.io/youruser"
+
+docker build -f docker\Dockerfile.exchange -t $env:DOCKER_REGISTRY/mbta-exchange:1.0 .
+docker build -f docker\Dockerfile.agent -t $env:DOCKER_REGISTRY/mbta-agent:1.0 .
+docker build -f docker\Dockerfile.registry -t $env:DOCKER_REGISTRY/mbta-registry:1.0 .
+
+docker push $env:DOCKER_REGISTRY/mbta-exchange:1.0
+docker push $env:DOCKER_REGISTRY/mbta-agent:1.0
+docker push $env:DOCKER_REGISTRY/mbta-registry:1.0
 ```
 
 This builds three images:
@@ -159,8 +187,13 @@ This builds three images:
 
 ### 9. Deploy to Kubernetes
 
+macOS:
 ```bash
 bash deploy.sh apply
+```
+Windows:
+```PowerShell
+kubectl apply -f k8s\
 ```
 
 This will:
@@ -183,21 +216,54 @@ kubectl -n mbta get svc frontend \
 
 ### 11. Test the system
 
+macOS:
 ```bash
 FRONTEND_IP=$(kubectl -n mbta get svc frontend -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+```
 
-# Health check
+Windows:
+```PowerShell
+$FRONTEND_IP = kubectl -n mbta get svc frontend -o jsonpath="{.status.loadBalancer.ingress[0].ip}"
+```
+#### Health check
+
+macOS:
+```bash
 curl http://${FRONTEND_IP}:3000/
+```
+Windows:
+```PowerShell
+curl http://$FRONTEND_IP`:3000/
+```
 
-# Simple query (MCP fast path ~400ms)
+#### Simple query (MCP fast path ~400ms)
+
+macOS:
+```bash
 curl -X POST http://exchange:8100/chat \
   -H "Content-Type: application/json" \
   -d '{"query": "Red Line delays?"}'
+```
+Windows:
+```PowerShell
+curl -Method POST http://$FRONTEND_IP`:8100/chat `
+  -Headers @{"Content-Type"="application/json"} `
+  -Body '{"query": "Red Line delays?"}'
+```
 
-# Complex query (A2A via SLIM ~1500ms)
+#### Complex query (A2A via SLIM ~1500ms)
+
+macOS:
+```bash
 curl -X POST http://exchange:8100/chat \
   -H "Content-Type: application/json" \
   -d '{"query": "How do I get from Harvard to MIT?"}'
+```
+Windows:
+```PowerShell
+curl -Method POST http://$FRONTEND_IP`:8100/chat `
+  -Headers @{"Content-Type"="application/json"} `
+  -Body '{"query": "How do I get from Harvard to MIT?"}'
 ```
 
 Open `http://<FRONTEND_IP>:3000` in your browser to use the chat interface.
@@ -218,36 +284,34 @@ Open http://localhost:16686, select service `exchange-agent`, and click **Find T
 
 For local development without cloud infrastructure:
 
-### First Time Setup
-
-#### 1. Configure environment
-
-```bash
-git clone https://github.com/DataWorksAI-com/MbtaWinter2026
-cd MbtaWinter2026
-```
-
-#### 2. Configure environment
+### 1. Configure environment
 
 ```bash
 cp .env.example .env
+# Edit .env — add your OPENAI_API_KEY and MBTA_API_KEY
 ```
 
-#### 3. Add API keys
-
-Edit `.env` - add your `OPENAI_API_KEY` and `MBTA_API_KEY`
-
-#### 4. Build and start the the services
+### 2. Start all services
 
 ```bash
-docker compose up -d --build
+docker compose up --build
 ```
 
-#### 5. Register agents
+### 3. Access the system
 
-Wait for services to start, then register agents
+| Service | URL |
+|---------|-----|
+| Frontend (Chat UI) | http://localhost:3000 |
+| Exchange API | http://localhost:8100 |
+| Jaeger (Traces) | http://localhost:16686 |
+| Grafana (Metrics) | http://localhost:3001 |
+| NANDA Registry | http://localhost:6900 |
 
+### 4. Register agents (first time only)
+
+macOS:
 ```bash
+# Wait for services to start, then register agents
 curl -s -X POST http://localhost:6900/register \
   -H "Content-Type: application/json" \
   -d '{"agent_id":"mbta-alerts","name":"MBTA Alerts Agent","agent_url":"http://alerts-agent:8001","status":"alive"}'
@@ -259,27 +323,26 @@ curl -s -X POST http://localhost:6900/register \
 curl -s -X POST http://localhost:6900/register \
   -H "Content-Type: application/json" \
   -d '{"agent_id":"mbta-stopfinder","name":"MBTA StopFinder Agent","agent_url":"http://stopfinder-agent:8003","status":"alive"}'
+
+```
+Windows:
+```PowerShell
+$REGISTRY_URL = "http://localhost:6900/register"
+
+curl.exe -s -X POST $REGISTRY_URL `
+  -H "Content-Type: application/json" `
+  -d '{"agent_id":"mbta-alerts","name":"MBTA Alerts Agent","agent_url":"http://alerts-agent:8001","status":"alive"}'
+
+curl.exe -s -X POST $REGISTRY_URL `
+  -H "Content-Type: application/json" `
+  -d '{"agent_id":"mbta-planner","name":"MBTA Planner Agent","agent_url":"http://planner-agent:8002","status":"alive"}'
+
+curl.exe -s -X POST $REGISTRY_URL `
+  -H "Content-Type: application/json" `
+  -d '{"agent_id":"mbta-stopfinder","name":"MBTA StopFinder Agent","agent_url":"http://stopfinder-agent:8003","status":"alive"}'
 ```
 
-### Regular Usage
-
-#### 1. Start all services
-
-```bash
-docker compose up -d
-```
-
-#### 2. Access the system
-
-| Service | URL |
-|---------|-----|
-| Frontend (Chat UI) | http://localhost:3000 |
-| Exchange API | http://localhost:8100 |
-| Jaeger (Traces) | http://localhost:16686 |
-| Grafana (Metrics) | http://localhost:3001 |
-| NANDA Registry | http://localhost:6900 |
-
-#### 3. Stop services
+### 5. Stop services
 
 ```bash
 docker compose down          # Stop containers
@@ -399,28 +462,46 @@ In Kubernetes, these are managed via ConfigMap (`k8s/configmap.yaml`) and Secret
 
 ### Delete Kubernetes resources
 
+macOS:
 ```bash
 bash deploy.sh destroy
+```
+Windows:
+```PowerShell
+kubectl delete -f k8s\
 ```
 
 ### Destroy LKE cluster (Terraform)
 
+macOS:
 ```bash
 cd terraform
 terraform destroy
+```
+Windows:
+```PowerShell
+cd terraform
+terraform destroy -var-file="terraform.tfvars"
 ```
 
 ### Remove local Docker resources
 
 ```bash
 docker compose down -v
+```
+macOS:
+```bash
 docker rmi $(docker images 'mbta-*' -q) 2>/dev/null || true
 ```
-
+Windows:
+```PowerShell
+docker images "mbta-*" -q | ForEach-Object { docker rmi $_ }
+```
 ## Redeploy (no cleanup)
 
 If the LKE cluster already exists and you did not run cleanup, you can redeploy in-place:
 
+macOS:
 ```bash
 # Build and push updated images
 export DOCKER_REGISTRY=docker.io/youruser
@@ -429,11 +510,27 @@ bash deploy.sh build
 # Re-apply manifests
 bash deploy.sh apply
 ```
+Windows:
+```PowerShell
+$env:DOCKER_REGISTRY="docker.io/youruser"
 
+docker build -f docker\Dockerfile.exchange -t $env:DOCKER_REGISTRY/mbta-exchange:1.0 .
+docker build -f docker\Dockerfile.agent -t $env:DOCKER_REGISTRY/mbta-agent:1.0 .
+docker build -f docker\Dockerfile.registry -t $env:DOCKER_REGISTRY/mbta-registry:1.0 .
+
+docker push $env:DOCKER_REGISTRY/mbta-exchange:1.0
+docker push $env:DOCKER_REGISTRY/mbta-agent:1.0
+docker push $env:DOCKER_REGISTRY/mbta-registry:1.0
+```
 If you only changed Kubernetes manifests and not the images:
 
+macOS:
 ```bash
 bash deploy.sh apply
+```
+Windows:
+```PowerShell
+kubectl apply -f k8s\
 ```
 
 ## Troubleshooting
