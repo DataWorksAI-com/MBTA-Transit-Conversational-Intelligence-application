@@ -14,7 +14,9 @@ from opentelemetry import trace
 import logging
 from urllib.parse import urlparse
 from datetime import datetime, timedelta
-from openai import OpenAI
+from .llm_client import get_llm_client
+llm = get_llm_client()
+
 import json
 
 # Import SLIM client
@@ -27,7 +29,9 @@ except ImportError:
 tracer = trace.get_tracer(__name__)
 logger = logging.getLogger(__name__)
 
-openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+raw = await llm.complete(system="", user=prompt, max_tokens=300)
+result = json.loads(raw)
+
 REGISTRY_URL = os.getenv("REGISTRY_URL", "http://23.92.17.180:6900")
 
 # Discovery cache
@@ -105,8 +109,6 @@ async def get_agent_catalog_from_registry() -> list[dict]:
                         continue
                     
                     agent_data = agent_response.json()
-                    if not agent_data.get("alive"):
-                        continue
                     
                     agents_info.append({
                         "agent_id": agent_data.get("agent_id"),
