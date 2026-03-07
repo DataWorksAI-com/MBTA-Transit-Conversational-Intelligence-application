@@ -9,6 +9,8 @@ from typing import Optional
 
 from anthropic import Omit
 
+class LLMClientException(RuntimeError):
+    pass
 
 class LLMClient:
     def __init__(self):
@@ -27,7 +29,7 @@ class LLMClient:
         if os.getenv("OPENAI_API_KEY"):
             return "openai"
 
-        raise RuntimeError("No LLM API key found. Set ANTHROPIC_API_KEY or OPENAI_API_KEY.")
+        raise LLMClientException("No LLM API key found. Set ANTHROPIC_API_KEY or OPENAI_API_KEY.")
 
     def _init_client(self):
         if self.provider == "anthropic":

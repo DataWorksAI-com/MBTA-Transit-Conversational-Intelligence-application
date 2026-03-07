@@ -13,6 +13,8 @@ from datetime import datetime
 from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 
 import sys
+
+from src.exchange_agent.llm_client import LLMClientException
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
 # Setup logging
@@ -44,9 +46,11 @@ try:
     from src.exchange_agent.llm_client import get_llm_client
     llm = get_llm_client()
     log.info(f"✓ LLM provider: {llm.provider}")
+except LLMClientException as e:
+    log.critical(f"Failed to set up LLM provider: {e}")
+    sys.exit(1)
 except RuntimeError as e:
-    llm = None
-    log.warning(f"LLM extraction disabled: {e}")
+    log.warning(f"Runtime error in LLM setup: {e}")
 
 
 # ============================================================================
