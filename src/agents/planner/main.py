@@ -4,7 +4,6 @@ Plans routes between stops using real MBTA data, including transfers
 """
 
 from fastapi import FastAPI, Query, HTTPException
-from fastapi.responses import JSONResponse
 from pydantic import BaseModel
 from typing import Dict, Any, Optional, List, Tuple
 import logging

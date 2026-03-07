@@ -37,6 +37,11 @@
 #   - name: CLICKHOUSE_PORT
 #     value: "8123"
 #   # Secret environment variables
+#   - name: ANTHROPIC_API_KEY
+#     valueFrom:
+#       secretKeyRef:
+#         name: anthropic-api-key-secret
+#         key: ANTHROPIC_API_KEY
 #   - name: OPENAI_API_KEY
 #     valueFrom:
 #       secretKeyRef:
@@ -49,6 +54,7 @@
 #         key: MBTA_API_KEY
 #
 # secrets:
+#   - anthropic-api-key-secret
 #   - openai-api-key-secret
 #   - mbta-api-key-secret
 #
