@@ -1,0 +1,962 @@
+query,routing_mode,ok,http_status,client_elapsed_ms,path,intent,confidence,latency_ms_server,response,error
+How crowded is the Red Line right now?,auto,True,200,2737,a2a,alerts,0.95,2529,"🟡 **Red Line Crowding: MODERATE**
+
+📊 Overall: 50% average occupancy across 4 trains
+
+Trains moderately busy. You'll likely find a seat.
+
+ℹ️ *Data from MBTA real-time vehicle occupancy sensors (updated every 10-30 seconds)*",
+How crowded is the Red Line right now?,mcp,True,200,10803,mcp,alerts,1.0,10768,"I’m sorry, but it looks like I’m unable to access the current crowd information for the Red Line right now. You might want to check the MBTA website or app for real-time updates.",
+How crowded is the Red Line right now?,a2a,True,200,2650,a2a,alerts,1.0,2627,"🟡 **Red Line Crowding: MODERATE**
+
+📊 Overall: 50% average occupancy across 4 trains
+
+Trains moderately busy. You'll likely find a seat.
+
+ℹ️ *Data from MBTA real-time vehicle occupancy sensors (updated every 10-30 seconds)*",
+How crowded is Red Line at Park Street?,auto,True,200,2587,a2a,alerts,0.95,2555,"🟡 **Red Line Crowding: MODERATE**
+
+📊 Overall: 50% average occupancy across 4 trains
+
+Trains moderately busy. You'll likely find a seat.
+
+ℹ️ *Data from MBTA real-time vehicle occupancy sensors (updated every 10-30 seconds)*",
+How crowded is Red Line at Park Street?,mcp,True,200,3070,mcp,alerts,1.0,3049,"It looks like there isn't any current information on the crowd levels for the Red Line at Park Street. If you're planning to travel soon, you might want to check again later for updates!",
+How crowded is Red Line at Park Street?,a2a,True,200,3032,a2a,alerts,1.0,2979,"🟡 **Red Line Crowding: MODERATE**
+
+📊 Overall: 50% average occupancy across 4 trains
+
+Trains moderately busy. You'll likely find a seat.
+
+ℹ️ *Data from MBTA real-time vehicle occupancy sensors (updated every 10-30 seconds)*",
+Is it busy on the Orange Line?,auto,True,200,2458,a2a,alerts,0.95,2419,"🟡 **Orange Line Crowding: MODERATE**
+
+📊 Overall: 50% average occupancy across 2 trains
+
+Trains moderately busy. You'll likely find a seat.
+
+ℹ️ *Data from MBTA real-time vehicle occupancy sensors (updated every 10-30 seconds)*",
+Is it busy on the Orange Line?,mcp,True,200,7511,mcp,alerts,1.0,7465,It looks like I wasn't able to get the latest information about the Orange Line's busyness right now. You might want to check a transit app or the MBTA website for real-time updates.,
+Is it busy on the Orange Line?,a2a,True,200,2619,a2a,alerts,1.0,2583,"🟡 **Orange Line Crowding: MODERATE**
+
+📊 Overall: 50% average occupancy across 2 trains
+
+Trains moderately busy. You'll likely find a seat.
+
+ℹ️ *Data from MBTA real-time vehicle occupancy sensors (updated every 10-30 seconds)*",
+Is there room on Green Line trains?,auto,True,200,2293,a2a,alerts,0.95,2277,"🟡 **Green-B Line Crowding: MODERATE**
+
+📊 Overall: 50% average occupancy across 4 trains
+
+Trains moderately busy. You'll likely find a seat.
+
+ℹ️ *Data from MBTA real-time vehicle occupancy sensors (updated every 10-30 seconds)*",
+Is there room on Green Line trains?,mcp,True,200,3462,mcp,alerts,1.0,3432,"It seems there was an issue retrieving information about room on the Green Line trains. However, typically, train capacity can vary throughout the day. If you're traveling during peak hours, it may be more crowded. For the latest updates, you might want to check the MBTA website or app.",
+Is there room on Green Line trains?,a2a,True,200,2304,a2a,alerts,1.0,2243,"🟡 **Green-B Line Crowding: MODERATE**
+
+📊 Overall: 50% average occupancy across 4 trains
+
+Trains moderately busy. You'll likely find a seat.
+
+ℹ️ *Data from MBTA real-time vehicle occupancy sensors (updated every 10-30 seconds)*",
+"Which is less crowded, Red or Orange Line?",auto,True,200,2412,a2a,alerts,0.95,2374,"🟡 **Red Line Crowding: MODERATE**
+
+📊 Overall: 50% average occupancy across 4 trains
+
+Trains moderately busy. You'll likely find a seat.
+
+ℹ️ *Data from MBTA real-time vehicle occupancy sensors (updated every 10-30 seconds)*",
+"Which is less crowded, Red or Orange Line?",mcp,True,200,9385,mcp,alerts,1.0,9366,"I'm sorry, but I wasn't able to get the latest crowd information for the Red and Orange Lines. However, generally speaking, the crowd levels can vary throughout the day. If you're looking for a less crowded option, it's often good to travel during off-peak hours. Let me know if you need help with anything else!",
+"Which is less crowded, Red or Orange Line?",a2a,True,200,2315,a2a,alerts,1.0,2281,"🟡 **Red Line Crowding: MODERATE**
+
+📊 Overall: 50% average occupancy across 4 trains
+
+Trains moderately busy. You'll likely find a seat.
+
+ℹ️ *Data from MBTA real-time vehicle occupancy sensors (updated every 10-30 seconds)*",
+How long do medical emergencies usually delay the train?,auto,True,200,2397,a2a,alerts,0.95,2361,"Based on analysis of 1,953 medical emergencies from MBTA data (2020-2023):
+
+• Typical duration: 33 minutes (median)
+• Range: 23-63 minutes (25th-75th percentile)
+• Average: 72 minutes
+
+This data shows medical emergencies usually resolve within this timeframe, though individual incidents vary.
+
+ℹ️ *Based on historical MBTA data (41,970 incidents, 2020-2023). Individual incidents may differ. Not a prediction of current delay duration.*",
+How long do medical emergencies usually delay the train?,mcp,True,200,4802,mcp,alerts,1.0,4788,"Medical emergencies can cause train delays, but the duration of those delays can vary greatly. It’s often hard to predict exactly how long a train will be delayed due to such situations, as it depends on the specifics of each incident. If you're concerned about delays, it’s always a good idea to check for real-time updates from the MBTA before traveling.",
+How long do medical emergencies usually delay the train?,a2a,True,200,2284,a2a,alerts,1.0,2253,"Based on analysis of 1,953 medical emergencies from MBTA data (2020-2023):
+
+• Typical duration: 33 minutes (median)
+• Range: 23-63 minutes (25th-75th percentile)
+• Average: 72 minutes
+
+This data shows medical emergencies usually resolve within this timeframe, though individual incidents vary.
+
+ℹ️ *Based on historical MBTA data (41,970 incidents, 2020-2023). Individual incidents may differ. Not a prediction of current delay duration.*",
+Typically how long do signal problems take to fix?,auto,True,200,1878,a2a,alerts,0.95,1866,"Based on analysis of 23,104 technical or signal equipment issues from MBTA data (2020-2023):
+
+• Typical duration: 41 minutes (median)
+• Range: 25-73 minutes (25th-75th percentile)
+• Average: 76 minutes
+
+This data shows technical or signal equipment issues usually resolve within this timeframe, though individual incidents vary.
+
+ℹ️ *Based on historical MBTA data (41,970 incidents, 2020-2023). Individual incidents may differ. Not a prediction of current delay duration.*",
+Typically how long do signal problems take to fix?,mcp,True,200,4060,mcp,alerts,1.0,4043,"Signal problems can vary in how long they take to fix, and it really depends on the specific issue. Sometimes, repairs can be completed relatively quickly, but other times, especially if the problem is complex, it might take a significant amount of time. Unfortunately, there isn't a standard timeframe since each situation is unique. If you hear about any specific signal issues, it's best to keep an eye on MBTA updates for the latest information.",
+Typically how long do signal problems take to fix?,a2a,True,200,2191,a2a,alerts,1.0,2184,"Based on analysis of 23,104 technical or signal equipment issues from MBTA data (2020-2023):
+
+• Typical duration: 41 minutes (median)
+• Range: 25-73 minutes (25th-75th percentile)
+• Average: 76 minutes
+
+This data shows technical or signal equipment issues usually resolve within this timeframe, though individual incidents vary.
+
+ℹ️ *Based on historical MBTA data (41,970 incidents, 2020-2023). Individual incidents may differ. Not a prediction of current delay duration.*",
+How long do police investigations usually delay trains?,auto,True,200,1907,a2a,alerts,0.95,1878,"Based on analysis of 2,393 police investigations or incidents from MBTA data (2020-2023):
+
+• Typical duration: 33 minutes (median)
+• Range: 20-50 minutes (25th-75th percentile)
+• Average: 45 minutes
+
+This data shows police investigations or incidents usually resolve within this timeframe, though individual incidents vary.
+
+ℹ️ *Based on historical MBTA data (41,970 incidents, 2020-2023). Individual incidents may differ. Not a prediction of current delay duration.*",
+How long do police investigations usually delay trains?,mcp,True,200,3798,mcp,alerts,1.0,3699,"Police investigations can cause delays to train services, but the exact duration can vary widely depending on the situation. There isn't a standard timeframe, as it often depends on the nature of the investigation and how quickly the police can complete their work. If you're concerned about current delays, it's a good idea to check the MBTA alerts for any updates related to your specific route.",
+How long do police investigations usually delay trains?,a2a,True,200,2186,a2a,alerts,1.0,2169,"Based on analysis of 2,393 police investigations or incidents from MBTA data (2020-2023):
+
+• Typical duration: 33 minutes (median)
+• Range: 20-50 minutes (25th-75th percentile)
+• Average: 45 minutes
+
+This data shows police investigations or incidents usually resolve within this timeframe, though individual incidents vary.
+
+ℹ️ *Based on historical MBTA data (41,970 incidents, 2020-2023). Individual incidents may differ. Not a prediction of current delay duration.*",
+How long do weather-related delays typically last?,auto,True,200,2175,a2a,alerts,0.95,2157,"Based on analysis of 149 weather-related disruptions from MBTA data (2020-2023):
+
+• Typical duration: 268 minutes (median)
+• Range: 86-559 minutes (25th-75th percentile)
+• Average: 298 minutes
+
+This data shows weather-related disruptions usually resolve within this timeframe, though individual incidents vary.
+
+ℹ️ *Based on historical MBTA data (41,970 incidents, 2020-2023). Individual incidents may differ. Not a prediction of current delay duration.*",
+How long do weather-related delays typically last?,mcp,True,200,4905,mcp,alerts,1.0,4886,"Weather-related delays on the MBTA can vary in duration, and there's no set timeframe for how long they typically last. Delays caused by maintenance or other issues can sometimes be ongoing or last for an unknown period. It's best to check for real-time updates for the most accurate information on any current delays. If you have a specific route in mind, I can help you find more details!",
+How long do weather-related delays typically last?,a2a,True,200,2261,a2a,alerts,1.0,2197,"Based on analysis of 149 weather-related disruptions from MBTA data (2020-2023):
+
+• Typical duration: 268 minutes (median)
+• Range: 86-559 minutes (25th-75th percentile)
+• Average: 298 minutes
+
+This data shows weather-related disruptions usually resolve within this timeframe, though individual incidents vary.
+
+ℹ️ *Based on historical MBTA data (41,970 incidents, 2020-2023). Individual incidents may differ. Not a prediction of current delay duration.*",
+"Based on past data, how long do delays usually take?",auto,True,200,1866,a2a,alerts,0.95,1852,"Based on MBTA Service Alerts data (2020-2023), typical delay durations:
+
+• Technical Or Signal Equipment Issues: 41 min median (23,104 incidents)
+• Police Investigations Or Incidents: 33 min median (2,393 incidents)
+• Medical Emergencies: 33 min median (1,953 incidents)
+• Vehicle Accidents: 40 min median (1,047 incidents)
+
+From analysis of 41,970 total subway incidents.
+
+ℹ️ *Historical data (2020-2023). Individual delays vary. Not a guarantee of current conditions.*",
+"Based on past data, how long do delays usually take?",mcp,True,200,3707,mcp,alerts,1.0,3688,"It seems there was an issue retrieving specific data on past delays. However, generally speaking, delays on the MBTA can vary widely depending on the situation, but they often last anywhere from a few minutes to over half an hour. If you have a specific line or time in mind, I can give you a better idea!",
+"Based on past data, how long do delays usually take?",a2a,True,200,2314,a2a,alerts,1.0,2293,"Based on MBTA Service Alerts data (2020-2023), typical delay durations:
+
+• Technical Or Signal Equipment Issues: 41 min median (23,104 incidents)
+• Police Investigations Or Incidents: 33 min median (2,393 incidents)
+• Medical Emergencies: 33 min median (1,953 incidents)
+• Vehicle Accidents: 40 min median (1,047 incidents)
+
+From analysis of 41,970 total subway incidents.
+
+ℹ️ *Historical data (2020-2023). Individual delays vary. Not a guarantee of current conditions.*",
+What are all the alerts on Red Line?,auto,True,200,4312,mcp,alerts,0.95,4275,"There is currently an alert for the Red Line that affects travel times on the Braintree Branch. From 8 PM until the end of service each night, riders can expect delays due to critical signal maintenance work near JFK/UMass. This work is part of a signal modernization project in response to damage from a derailment in 2019.
+
+The maintenance will continue through March 14, and you should plan for an additional 10 to 15 minutes of travel time during this period. The next phase of work is expected to start on March 15, which may further affect travel on the Ashmont Branch. For more details, you can visit [this link](http://mbta.com/ColumbiaJunction).",
+What are all the alerts on Red Line?,mcp,True,200,4106,mcp,alerts,1.0,4088,"There is currently an alert for the Red Line that affects travel times on the Braintree Branch. Starting from 8 PM each night, riders can expect delays due to essential signal work near JFK/UMass. This work is part of a modernization project that will continue through March 14, 2026. 
+
+Riders should plan for an additional 10 to 15 minutes of travel time during this period. The next phase of this work is expected to begin on March 15, with potential longer delays on the Ashmont Branch. For more details, you can visit the MBTA website [here](http://mbta.com/ColumbiaJunction).",
+What are all the alerts on Red Line?,a2a,True,200,2461,a2a,alerts,1.0,2431,"Current scheduled maintenance:
+📋 Scheduled: Red Line riders can expect longer travel times on the Braintree Branch nightly from 8 PM, to end of service. This is to allow for critical signal work near JFK/UMass. ",
+Show me all current MBTA service disruptions,auto,True,200,4426,mcp,alerts,0.95,4391,"Here are the current MBTA service disruptions:
+
+1. **Bowdoin Station Escalator**: The escalator from the lobby to the street at Bowdoin Station is out of service indefinitely due to severe corrosion. A complete replacement is required, which will take time as it involves significant station upgrades. Meanwhile, Government Center Station, which is accessible and less than a quarter-mile away, serves the Blue Line.
+
+2. **Lynn Parking Garage**: The Lynn Parking Garage is partially closed, but there is still enough parking available to meet daily demand.
+
+If you have any specific route or station questions, feel free to ask!",
+Show me all current MBTA service disruptions,mcp,True,200,4188,mcp,alerts,1.0,4154,"Currently, there are two service disruptions on the MBTA:
+
+1. **Bowdoin Station Escalator**: The escalator from the lobby to the street is out of service until further notice due to severe corrosion that requires a complete replacement. The MBTA is working on a solution, but this process will take time. In the meantime, Government Center Station, which is accessible and serves the Blue Line, is less than a quarter-mile away.
+
+2. **Lynn Parking Garage**: The garage is partially closed, but there is still enough parking available to meet daily demand.
+
+If you need further details or updates, feel free to ask!",
+Show me all current MBTA service disruptions,a2a,True,200,3570,a2a,alerts,1.0,3508,"Current scheduled maintenance:
+📋 Scheduled: Red Line riders can expect longer travel times on the Braintree Branch nightly from 8 PM, to end of service. This is to allow for critical signal work near JFK/UMass. ",
+Are there any Green Line delays right now?,auto,True,200,2458,mcp,alerts,0.95,2435,There are currently no delays on the Green Line. Everything is running smoothly!,
+Are there any Green Line delays right now?,mcp,True,200,2450,mcp,alerts,1.0,2437,There are currently no delays on the Green Line.,
+Are there any Green Line delays right now?,a2a,True,200,2546,a2a,alerts,1.0,2536,✅ No current transit delays on Green-B Line.,
+Check Orange and Blue Line status,auto,True,200,4955,mcp,alerts,0.95,4920,"Currently, the Orange Line is experiencing service disruptions. Shuttle buses are replacing train service between Back Bay and Forest Hills until the end of the day on March 6. Regular service will resume tomorrow, March 7, as the signal system upgrades have been completed ahead of schedule.
+
+For those affected, all shuttle buses will be accessible, and you can travel fare-free on the Franklin/Foxboro, Needham, or Providence/Stoughton Commuter Rail lines between Forest Hills, Ruggles, Back Bay, and South Station. Please allow extra travel time, as it may take about 30 minutes longer than usual to get to Downtown Crossing from Forest Hills.
+
+If you need specific shuttle bus stop information, just let me know! 
+
+As for the Blue Line, there are no alerts or disruptions reported at this time.",
+Check Orange and Blue Line status,mcp,True,200,4095,mcp,alerts,1.0,4079,"Currently, the Orange Line is experiencing shuttle bus replacements between Back Bay and Forest Hills. This will be in effect until the end of service today, March 6. Regular train service will resume tomorrow, March 7.
+
+All shuttle buses are accessible, and you can use fare-free Commuter Rail options on the Franklin/Foxboro, Needham, or Providence/Stoughton Lines for travel between Forest Hills, Ruggles, Back Bay, and South Station. Keep in mind that shuttle bus rides may take longer than usual, so allow extra time for your journey.
+
+As for the Blue Line, there are no alerts or service changes reported at this time. If you need more details or have specific stops in mind, just let me know!",
+Check Orange and Blue Line status,a2a,True,200,3031,a2a,alerts,1.0,3001,✅ No current transit delays on Orange Line.,
+Route from Park Street to Harvard,auto,True,200,3804,a2a,trip_planning,0.95,3784,"Current scheduled maintenance:
+📋 Scheduled: Red Line riders can expect longer travel times on the Braintree Branch nightly from 8 PM, to end of service. This is to allow for critical signal work near JFK/UMass. 
+
+Take the Red Line from Park Street to Harvard.
+
+✅ Route planning complete",
+Route from Park Street to Harvard,mcp,True,200,3898,mcp,trip_planning,1.0,3858,"It looks like there was an issue retrieving the route information from Park Street to Harvard. However, you can take the Red Line from Park Street towards Alewife and get off at Harvard Square. This should get you to your destination smoothly! If you need more help, feel free to ask.",
+Route from Park Street to Harvard,a2a,True,200,3072,a2a,trip_planning,1.0,3044,"Current scheduled maintenance:
+📋 Scheduled: Red Line riders can expect longer travel times on the Braintree Branch nightly from 8 PM, to end of service. This is to allow for critical signal work near JFK/UMass. 
+
+Take the Red Line from Park Street to Harvard.
+
+✅ Route planning complete",
+How do I get from Downtown Crossing to Back Bay?,auto,True,200,2785,a2a,trip_planning,0.95,2750,"Current scheduled maintenance:
+📋 Scheduled: Red Line riders can expect longer travel times on the Braintree Branch nightly from 8 PM, to end of service. This is to allow for critical signal work near JFK/UMass. 
+
+Couldn't find 'back bay?'.",
+How do I get from Downtown Crossing to Back Bay?,mcp,True,200,3454,mcp,trip_planning,1.0,3428,"To get from Downtown Crossing to Back Bay, you can take the Orange Line subway. Start at Downtown Crossing station and head towards North Station. Get off at Back Bay station, which is just a few stops away. The trip should take around 10-15 minutes. Safe travels!",
+How do I get from Downtown Crossing to Back Bay?,a2a,True,200,4048,a2a,trip_planning,1.0,4023,"Current scheduled maintenance:
+📋 Scheduled: Red Line riders can expect longer travel times on the Braintree Branch nightly from 8 PM, to end of service. This is to allow for critical signal work near JFK/UMass. 
+
+Couldn't find 'back bay?'.",
+I need to get from Kendall to South Station,auto,True,200,3387,a2a,trip_planning,0.95,3373,"Current scheduled maintenance:
+📋 Scheduled: Red Line riders can expect longer travel times on the Braintree Branch nightly from 8 PM, to end of service. This is to allow for critical signal work near JFK/UMass. 
+
+Take the Red Line from Kendall/MIT to South Station.
+
+✅ Route planning complete",
+I need to get from Kendall to South Station,mcp,True,200,4644,mcp,trip_planning,1.0,4632,"It looks like there was an issue retrieving the trip information. However, I can guide you on how to get from Kendall to South Station. You can take the Red Line subway from Kendall/MIT Station toward Ashmont/Braintree and transfer at Park Street to the Green Line or stay on the Red Line until you reach South Station. The trip should take around 15 to 20 minutes. Let me know if you need more help!",
+I need to get from Kendall to South Station,a2a,True,200,3357,a2a,trip_planning,1.0,3340,"Current scheduled maintenance:
+📋 Scheduled: Red Line riders can expect longer travel times on the Braintree Branch nightly from 8 PM, to end of service. This is to allow for critical signal work near JFK/UMass. 
+
+Take the Red Line from Kendall/MIT to South Station.
+
+✅ Route planning complete",
+Route from Fenway Park to South Station,auto,True,200,6465,a2a,trip_planning,0.95,6446,,
+Route from Fenway Park to South Station,mcp,True,200,4427,mcp,trip_planning,1.0,4388,"It seems there was an issue retrieving the route information. However, I can help you with directions from Fenway Park to South Station. You can take the Green Line from Kenmore Station near Fenway Park to Government Center, then transfer to the Orange Line towards Forest Hills and get off at South Station. Let me know if you need more help!",
+Route from Fenway Park to South Station,a2a,True,200,5034,a2a,trip_planning,1.0,5001,,
+How do I get from Park Street to Museum of Fine Arts?,auto,True,200,3629,a2a,trip_planning,0.95,3610,"Museum Of Fine Arts? is at Museum of Fine Arts.
+
+",
+How do I get from Park Street to Museum of Fine Arts?,mcp,True,200,3714,mcp,trip_planning,1.0,3698,"To get from Park Street to the Museum of Fine Arts, you can take the Green Line. Board the Green Line train at Park Street heading towards Kenmore. Get off at the Museum of Fine Arts stop. It should be a quick and easy trip! Enjoy your visit!",
+How do I get from Park Street to Museum of Fine Arts?,a2a,True,200,3663,a2a,trip_planning,1.0,3642,"Museum Of Fine Arts? is at Museum of Fine Arts.
+
+",
+Route from Boston Common to Prudential Center,auto,True,200,2945,a2a,trip_planning,0.95,2914,,
+Route from Boston Common to Prudential Center,mcp,True,200,3824,mcp,trip_planning,1.0,3809,"It looks like I wasn't able to get the specific route details at the moment. However, you can easily get from Boston Common to Prudential Center by walking or taking the subway. If you choose to walk, it's about a 15-20 minute stroll. If you prefer the subway, you can take the Green Line from Park Street Station (near Boston Common) to the Prudential Station. Let me know if you need more help!",
+Route from Boston Common to Prudential Center,a2a,True,200,3741,a2a,trip_planning,1.0,3727,,
+Get me from that big hospital in Longwood to TD Garden,auto,True,200,2525,a2a,trip_planning,0.95,2507,"Td Garden is at North Station.
+
+",
+Get me from that big hospital in Longwood to TD Garden,mcp,True,200,3771,mcp,trip_planning,1.0,3760,"It looks like I wasn't able to get the information you requested right now. However, I can help you with directions! To get from the Longwood Medical Area to TD Garden, you can take the Green Line train from Longwood to Government Center, and then transfer to the Orange Line to North Station, which is right next to TD Garden. If you need more help with the details, just let me know!",
+Get me from that big hospital in Longwood to TD Garden,a2a,True,200,3154,a2a,trip_planning,1.0,3129,"Td Garden is at North Station.
+
+",
+Route from MIT to BU,auto,True,200,4983,a2a,trip_planning,0.95,4964,"Bu is at Boston University East.
+
+",
+Route from MIT to BU,mcp,True,200,4759,mcp,trip_planning,1.0,4739,"It seems there was an issue retrieving the route information. However, I can help you with directions from MIT to Boston University. You can take the subway from Kendall/MIT Station (on the Red Line) towards Alewife and transfer at Park Street to the Green Line. Then, head towards Boston College, and get off at one of the BU stops. Let me know if you need more details!",
+Route from MIT to BU,a2a,True,200,4944,a2a,trip_planning,1.0,4935,"Bu is at Boston University East.
+
+",
+Give me two route options from South Station to Kenmore,auto,True,200,10566,a2a,trip_planning,0.95,10555,"Current scheduled maintenance:
+📋 Scheduled: Red Line riders can expect longer travel times on the Braintree Branch nightly from 8 PM, to end of service. This is to allow for critical signal work near JFK/UMass. 
+
+🧠 **Routing Based on Current Conditions:**
+
+
+Here are two different route options from South Station to Kenmore using the MBTA system:
+
+### Route Option 1
+- **Lines Used:** Red Line to Park Street, Green Line to Kenmore
+- **Transfers:** 1 transfer at Park Street
+- **Stops & Time:**
+  1. **South Station (Red Line)** → Board Alewife-bound train
+  2. **Park Street (Red Line)** → Transfer to Green Line
+  3. **Park Street (Green Line)** → Board B, C, D, or E branch train (any train heading toward Kenmore)
+  4. **Kenmore (Green Line)**
+
+**Total Time Estimate:** Approximately 20-25 minutes
+
+### Route Option 2
+- **Lines Used:** Red Line to Downtown Crossing, Orange Line to North Station, Green Line to Kenmore
+- **Transfers:** 2 transfers (1 at Downtown Crossing and 1 at North Station)
+- **Stops & Time:**
+  1. **South Station (Red Line)** → Board Alewife-bound train
+  2. **Downtown Crossing (Red Line)** → Transfer to Orange Line
+  3. **Downtown Crossing (Orange Line)** → Board Forest Hills-bound train
+  4. **North Station (Orange Line)** → Transfer to Green Line
+  5. **North Station (Green Line)** → Board B, C, D, or E branch train (any train heading toward Kenmore)
+  6. **Kenmore (Green Line)**
+
+**Total Time Estimate:** Approximately 30-35 minutes
+
+Both options provide effective routes to reach Kenmore from South Station, with varying travel times based on the number of transfers.
+
+✅ Route planning complete",
+Give me two route options from South Station to Kenmore,mcp,True,200,5277,mcp,trip_planning,1.0,5264,"It seems there was an issue retrieving the route options. However, I can suggest two ways to get from South Station to Kenmore:
+
+1. **Subway Option**: Take the Orange Line from North Station to Haymarket, then transfer to the Green Line (C or D branch) towards Kenmore. 
+
+2. **Bus Option**: You can also take the #43 or #57 bus from South Station, which will take you closer to Kenmore.
+
+Let me know if you need more details!",
+Give me two route options from South Station to Kenmore,a2a,True,200,10073,a2a,trip_planning,1.0,10060,"Current scheduled maintenance:
+📋 Scheduled: Red Line riders can expect longer travel times on the Braintree Branch nightly from 8 PM, to end of service. This is to allow for critical signal work near JFK/UMass. 
+
+🧠 **Routing Based on Current Conditions:**
+
+
+Here are two different route options from South Station to Kenmore using the MBTA system:
+
+### Option 1:
+- **Lines Used:** Red Line → Green Line (B, C, or D branches)
+- **Transfers:** 1 transfer at Park Street
+- **Stops + Time:**
+  1. **South Station** (Board Red Line towards Alewife)
+  2. **Park Street** (Transfer to Green Line)
+  3. **Kenmore** (Board Green Line towards Kenmore)
+  
+  **Total Time:** Approximately 25-30 minutes (including wait and transfer time)
+
+---
+
+### Option 2:
+- **Lines Used:** Red Line → Orange Line → Green Line (B, C, or D branches)
+- **Transfers:** 2 transfers (1 at Downtown Crossing and 1 at Park Street)
+- **Stops + Time:**
+  1. **South Station** (Board Red Line towards Alewife)
+  2. **Downtown Crossing** (Transfer to Orange Line)
+  3. **Back Bay** (Board Orange Line towards Forest Hills)
+  4. **Park Street** (Transfer to Green Line)
+  5. **Kenmore** (Board Green Line towards Kenmore)
+
+  **Total Time:** Approximately 35-40 minutes (including wait and transfer time)
+
+### Summary
+- **Option 1** is the more direct route, taking about 25-30 minutes with one transfer.
+- **Option 2** involves two transfers and takes a bit longer, around 35-40 minutes.
+
+✅ Route planning complete",
+Show me multiple routes from Park Street to Airport,auto,True,200,10863,a2a,trip_planning,0.95,10842,"Current scheduled maintenance:
+📋 Scheduled: Red Line riders can expect longer travel times on the Braintree Branch nightly from 8 PM, to end of service. This is to allow for critical signal work near JFK/UMass. 
+
+🧠 **Routing Based on Current Conditions:**
+
+
+Here are two different route options from Park Street to TF Green Airport using the MBTA system:
+
+### Option 1
+- **Lines Used**: Red Line + Commuter Rail (via Providence/Stoughton Line)
+- **Transfers**: 1 transfer at South Station
+- **Stops**:
+  1. **Park Street** (Board the Red Line towards Ashmont/Braintree)
+  2. **South Station** (Transfer to the Commuter Rail)
+  3. **TF Green Airport Station** (Take the Providence/Stoughton Line towards Wickford Junction)
+  
+- **Estimated Time**: 
+  - Red Line from Park Street to South Station: ~2 minutes
+  - Wait time for Commuter Rail: ~10 minutes (average)
+  - Commuter Rail from South Station to TF Green Airport: ~20 minutes
+  - **Total Estimated Time**: ~32 minutes
+
+---
+
+### Option 2
+- **Lines Used**: Red Line + Orange Line + Commuter Rail
+- **Transfers**: 2 transfers (1 at Downtown Crossing and 1 at South Station)
+- **Stops**:
+  1. **Park Street** (Board the Red Line towards Ashmont/Braintree)
+  2. **Downtown Crossing** (Transfer to the Orange Line)
+  3. **North Station** (Transfer to the Commuter Rail)
+  4. **TF Green Airport Station** (Take the Providence/Stoughton Line towards Wickford Junction)
+  
+- **Estimated Time**:
+  - Red Line from Park Street to Downtown Crossing: ~2 minutes
+  - Orange Line from Downtown Crossing to North Station: ~5 minutes
+  - Wait time for Commuter Rail: ~10 minutes (average)
+  - Commuter Rail from North Station to TF Green Airport: ~20 minutes
+  - **Total Estimated Time**: ~37 minutes
+
+These options provide different routes depending on the preference for fewer transfers or different lines.
+
+✅ Route planning complete",
+Show me multiple routes from Park Street to Airport,mcp,True,200,4455,mcp,trip_planning,1.0,4422,"It seems that I'm currently unable to provide specific routes from Park Street to the Airport. However, you can typically take the Green Line from Park Street to Government Center, then transfer to the Blue Line towards Wonderland, which will take you directly to the Airport station. If you need more options or details, let me know!",
+Show me multiple routes from Park Street to Airport,a2a,True,200,11830,a2a,trip_planning,1.0,11808,"Current scheduled maintenance:
+📋 Scheduled: Red Line riders can expect longer travel times on the Braintree Branch nightly from 8 PM, to end of service. This is to allow for critical signal work near JFK/UMass. 
+
+🧠 **Routing Based on Current Conditions:**
+
+
+Here are two different route options from Park Street to TF Green Airport using the MBTA system:
+
+### Option 1: Red Line to Providence Line
+- **Lines Used**: Red Line, MBTA Commuter Rail (Providence Line)
+- **Transfers**: 1 transfer at South Station
+- **Stops + Time**:
+  1. Start at Park Street Station (Red Line)
+  2. Travel from Park Street to South Station (1 stop, approximately 2 minutes)
+  3. Transfer at South Station to the MBTA Commuter Rail (Providence Line)
+  4. Travel from South Station to TF Green Airport Station (approximately 30 minutes)
+  
+**Total Travel Time**: Approximately 32 minutes (excluding waiting times)
+
+---
+
+### Option 2: Red Line to Downtown Crossing, then Orange Line to Back Bay
+- **Lines Used**: Red Line, Orange Line
+- **Transfers**: 1 transfer at Downtown Crossing
+- **Stops + Time**:
+  1. Start at Park Street Station (Red Line)
+  2. Travel from Park Street to Downtown Crossing (1 stop, approximately 2 minutes)
+  3. Transfer at Downtown Crossing to the Orange Line (Forest Hills direction)
+  4. Travel from Downtown Crossing to Back Bay Station (2 stops, approximately 4 minutes)
+  5. Walk from Back Bay to the MBTA Commuter Rail (Providence Line) station (approximately 5 minutes)
+  6. Board the Providence Line train at Back Bay and travel to TF Green Airport Station (approximately 30 minutes)
+  
+**Total Travel Time**: Approximately 41 minutes (excluding waiting times)
+
+---
+
+### Summary
+- **Option 1** is more direct, utilizing the Red Line and the Providence Line via South Station.
+- **Option 2** involves a transfer at Downtown Crossing and an additional walk to Back Bay for the Commuter Rail.
+
+✅ Route planning complete",
+Compare routes from Harvard to Kenmore,auto,True,200,12933,a2a,trip_planning,0.95,12925,"Current scheduled maintenance:
+📋 Scheduled: Red Line riders can expect longer travel times on the Braintree Branch nightly from 8 PM, to end of service. This is to allow for critical signal work near JFK/UMass. 
+
+🧠 **Routing Based on Current Conditions:**
+
+
+Here are two different route options from Harvard to Kenmore using the MBTA system:
+
+### Option 1
+- **Lines Used:** Red Line → Green Line
+- **Transfers:** 1 transfer at Park Street
+- **Stops + Time:**
+  1. **Start at Harvard Station (Red Line)**
+  2. **Travel to Park Street (4 stops)**
+     - Stops: Alewife, Alewife, Porter, Alewife → Park Street
+     - Estimated Time: 15 minutes
+  3. **Transfer to Green Line (B, C, D, or E Branch)**
+  4. **Travel to Kenmore Station (2 stops)**
+     - Stops: Park Street → Boylston → Kenmore
+     - Estimated Time: 6 minutes
+- **Total Estimated Time:** 21 minutes
+
+### Option 2
+- **Lines Used:** Red Line → Orange Line → Green Line
+- **Transfers:** 2 transfers (1 at Downtown Crossing, 1 at Park Street)
+- **Stops + Time:**
+  1. **Start at Harvard Station (Red Line)**
+  2. **Travel to Downtown Crossing (4 stops)**
+     - Stops: Alewife, Alewife, Porter, Alewife → Downtown Crossing
+     - Estimated Time: 15 minutes
+  3. **Transfer to Orange Line (Forest Hills direction)**
+  4. **Travel to Haymarket (1 stop)**
+     - Stops: Downtown Crossing → Haymarket
+     - Estimated Time: 2 minutes
+  5. **Transfer to Green Line at Haymarket Station**
+  6. **Travel to Kenmore Station (2 stops)**
+     - Stops: Haymarket → Government Center → Kenmore
+     - Estimated Time: 8 minutes
+- **Total Estimated Time:** 25 minutes
+
+Each option offers a different travel experience, with varying numbers of transfers and total time.
+
+✅ Route planning complete",
+Compare routes from Harvard to Kenmore,mcp,True,200,5499,mcp,trip_planning,1.0,5480,"It looks like I couldn't retrieve the route information from Harvard to Kenmore right now. However, I can suggest a couple of options for you. You can take the subway from Harvard Station on the Red Line towards Ashmont and transfer at Park Street to the Green Line towards Kenmore. Alternatively, you might consider taking a bus or a different route depending on your preferences. Let me know if you need more help with directions!",
+Compare routes from Harvard to Kenmore,a2a,True,200,15685,a2a,trip_planning,1.0,15568,"Current scheduled maintenance:
+📋 Scheduled: Red Line riders can expect longer travel times on the Braintree Branch nightly from 8 PM, to end of service. This is to allow for critical signal work near JFK/UMass. 
+
+🧠 **Routing Based on Current Conditions:**
+
+
+Here are two different route options from Harvard to Kenmore using the MBTA system:
+
+### Option 1
+- **Lines Used:** Red Line → Green Line
+- **Transfers:** 1 transfer at Park Street
+- **Stops + Time:**
+  1. Start at Harvard Station on the Red Line
+  2. Travel to Park Street Station (3 stops: Alewife → Alewife → Porter → Alewife → Park Street) - Approx. 10 minutes
+  3. Transfer to the Green Line (C or D branch towards Kenmore)
+  4. Travel to Kenmore Station (4 stops: Park Street → Boylston → Arlington → Kenmore) - Approx. 5 minutes
+
+- **Total Time:** Approx. 15 minutes
+
+---
+
+### Option 2
+- **Lines Used:** Red Line → Orange Line → Green Line
+- **Transfers:** 2 transfers (1 at Downtown Crossing, 1 at Park Street)
+- **Stops + Time:**
+  1. Start at Harvard Station on the Red Line
+  2. Travel to Downtown Crossing (2 stops: Alewife → Park Street → Downtown Crossing) - Approx. 6 minutes
+  3. Transfer to the Orange Line towards Forest Hills
+  4. Travel to Haymarket Station (2 stops: Downtown Crossing → North Station → Haymarket) - Approx. 4 minutes
+  5. Transfer to the Green Line (E branch towards Kenmore)
+  6. Travel to Kenmore Station (4 stops: Haymarket → Government Center → Park Street → Kenmore) - Approx. 6 minutes
+
+- **Total Time:** Approx. 16 minutes
+
+These options provide different routes to reach Kenmore from Harvard, utilizing various lines and transfer points within the MBTA system.
+
+✅ Route planning complete",
+What are my route options to get from Alewife to Airport?,auto,True,200,9717,a2a,trip_planning,0.95,9659,"Current scheduled maintenance:
+📋 Scheduled: Red Line riders can expect longer travel times on the Braintree Branch nightly from 8 PM, to end of service. This is to allow for critical signal work near JFK/UMass. 
+
+Couldn't find 'airport?'.",
+What are my route options to get from Alewife to Airport?,mcp,True,200,6283,mcp,trip_planning,1.0,6213,"It seems there was an issue retrieving the route options for your trip from Alewife to the Airport. However, I can suggest a common route: 
+
+You can take the Alewife station on the Red Line towards Ashmont or Braintree, then transfer at South Station to the Silver Line, which will take you directly to the Airport. 
+
+If you need more detailed instructions or assistance, feel free to ask!",
+What are my route options to get from Alewife to Airport?,a2a,True,200,8254,a2a,trip_planning,1.0,8101,"Current scheduled maintenance:
+📋 Scheduled: Red Line riders can expect longer travel times on the Braintree Branch nightly from 8 PM, to end of service. This is to allow for critical signal work near JFK/UMass. 
+
+Couldn't find 'airport?'.",
+Route from South Station to Harvard avoiding crowds,auto,True,200,7333,a2a,trip_planning,0.9,7238,Couldn't find 'harvard avoiding crowds'.,
+Route from South Station to Harvard avoiding crowds,mcp,True,200,5982,mcp,trip_planning,1.0,5922,"It seems there was an issue retrieving the route information. However, to avoid crowds when traveling from South Station to Harvard, you might want to consider taking the subway during off-peak hours, such as mid-morning or mid-afternoon. You can take the Red Line from South Station towards Alewife and transfer at Park Street to the Green Line towards Lechmere. This route should help you avoid the busiest times. If you need more specific timing or alternatives, let me know!",
+Route from South Station to Harvard avoiding crowds,a2a,True,200,8436,a2a,trip_planning,1.0,8338,Couldn't find 'harvard avoiding crowds'.,
+Least crowded route to Kenmore from Downtown,auto,True,200,18672,a2a,trip_planning,0.9,18476,"🧠 **Routing Based on Current Conditions:**
+
+
+From Downtown Crossing, take the Orange Line towards North Station to Haymarket (3 stops, ~5 min), then transfer to the Green Line B branch towards Boston College and continue to Kenmore (6 stops, ~10 min).
+
+✅ Route planning complete",
+Least crowded route to Kenmore from Downtown,mcp,True,200,5553,mcp,trip_planning,1.0,5451,"It seems there was an issue retrieving the information about the least crowded route to Kenmore from Downtown. However, I recommend checking the MBTA's website or a transit app for real-time crowding information and the best routes. You can also try taking the Green Line from Park Street to Kenmore, as it’s a common route.",
+Least crowded route to Kenmore from Downtown,a2a,True,200,9454,a2a,trip_planning,1.0,9352,"🧠 **Routing Based on Current Conditions:**
+
+
+From Downtown Crossing, take the Orange Line towards North Station to Haymarket (3 stops, ~5 min), then transfer to the Green Line C branch towards Cleveland Circle and continue to Kenmore (5 stops, ~10 min).
+
+✅ Route planning complete",
+Most comfortable route to MIT from Back Bay,auto,True,200,11759,a2a,trip_planning,0.9,11696,"Current scheduled maintenance:
+📋 Scheduled: Red Line riders can expect longer travel times on the Braintree Branch nightly from 8 PM, to end of service. This is to allow for critical signal work near JFK/UMass. 
+
+🧠 **Routing Based on Current Conditions:**
+
+
+From Back Bay, take the Orange Line towards North Station to Haymarket (3 stops, ~5 min), then transfer to the Green Line and take the C branch towards Government Center to Park Street (1 stop, ~2 min), and finally, take the Red Line towards Ashmont/Braintree to Kendall/MIT (2 stops, ~4 min), totaling approximately 11 minutes of travel time.
+
+✅ Route planning complete",
+Most comfortable route to MIT from Back Bay,mcp,True,200,5874,mcp,trip_planning,1.0,5787,"It seems there was an issue retrieving the information about the best route from Back Bay to MIT. However, a comfortable way to get to MIT is to take the Orange Line from Back Bay Station to North Station, and then transfer to the Green Line, which will take you directly to Kendall/MIT Station. This route is generally smooth and convenient.",
+Most comfortable route to MIT from Back Bay,a2a,True,200,17562,a2a,trip_planning,1.0,17498,"Current scheduled maintenance:
+📋 Scheduled: Red Line riders can expect longer travel times on the Braintree Branch nightly from 8 PM, to end of service. This is to allow for critical signal work near JFK/UMass. 
+
+🧠 **Routing Based on Current Conditions:**
+
+
+From Back Bay, take the Orange Line towards North Station to Haymarket (3 stops, ~5 min), then transfer to the Green Line and take the C branch towards Government Center to Park Street (1 stop, ~2 min), and finally, transfer to the Red Line towards Alewife to Kendall/MIT (1 stop, ~2 min), totaling approximately 9 minutes of travel time.
+
+✅ Route planning complete",
+Route to Harvard where I can get a seat,auto,True,200,7744,a2a,trip_planning,0.95,7664,"Current scheduled maintenance:
+📋 Scheduled: Red Line riders can expect longer travel times on the Braintree Branch nightly from 8 PM, to end of service. This is to allow for critical signal work near JFK/UMass. 
+
+Where are you starting from? Example: 'From Park Street to harvard'",
+Route to Harvard where I can get a seat,mcp,True,200,5418,mcp,trip_planning,1.0,5337,"It seems there was an issue retrieving the route information for getting to Harvard. However, I can help you with general directions or advice on how to find a seat on your trip. Would you like to know about specific bus or train options?",
+Route to Harvard where I can get a seat,a2a,True,200,5312,a2a,trip_planning,1.0,5262,"Current scheduled maintenance:
+📋 Scheduled: Red Line riders can expect longer travel times on the Braintree Branch nightly from 8 PM, to end of service. This is to allow for critical signal work near JFK/UMass. 
+
+Where are you starting from? Example: 'From Park Street to harvard'",
+Route from Park Street to Kenmore considering current delays,auto,True,200,6465,a2a,trip_planning,0.95,6384,"Current scheduled maintenance:
+📋 Scheduled: Red Line riders can expect longer travel times on the Braintree Branch nightly from 8 PM, to end of service. This is to allow for critical signal work near JFK/UMass. 
+
+Couldn't find 'kenmore considering current delays'.",
+Route from Park Street to Kenmore considering current delays,mcp,True,200,4695,mcp,trip_planning,1.0,4623,"It seems there was an issue retrieving the route information from Park Street to Kenmore due to a technical problem. I recommend checking the MBTA website or app for the latest updates on delays and routes. If you need help with anything else, feel free to ask!",
+Route from Park Street to Kenmore considering current delays,a2a,True,200,6830,a2a,trip_planning,1.0,6807,"Current scheduled maintenance:
+📋 Scheduled: Red Line riders can expect longer travel times on the Braintree Branch nightly from 8 PM, to end of service. This is to allow for critical signal work near JFK/UMass. 
+
+Couldn't find 'kenmore considering current delays'.",
+Best route to Harvard if Red Line has delays,auto,True,200,5516,a2a,trip_planning,0.9,5404,"Current scheduled maintenance:
+📋 Scheduled: Red Line riders can expect longer travel times on the Braintree Branch nightly from 8 PM, to end of service. This is to allow for critical signal work near JFK/UMass. 
+
+Where are you starting from? Example: 'From Park Street to harvard'",
+Best route to Harvard if Red Line has delays,mcp,True,200,3952,mcp,trip_planning,1.0,3923,"It looks like there are some delays on the Red Line. A good alternative route to Harvard would be to take the Green Line instead. You can transfer to the Green Line at Park Street and take it to Alewife, then catch a bus or another train from there. Make sure to check real-time schedules for any updates. Safe travels!",
+Best route to Harvard if Red Line has delays,a2a,True,200,3586,a2a,trip_planning,1.0,3545,"Current scheduled maintenance:
+📋 Scheduled: Red Line riders can expect longer travel times on the Braintree Branch nightly from 8 PM, to end of service. This is to allow for critical signal work near JFK/UMass. 
+
+Where are you starting from? Example: 'From Park Street to harvard'",
+Route to Airport to kenmore without using Blue Line,auto,True,200,3466,a2a,trip_planning,0.95,3441,Where are you starting from? Example: 'From Park Street to airport to kenmore',
+Route to Airport to kenmore without using Blue Line,mcp,True,200,4799,mcp,trip_planning,1.0,4776,"It seems that I couldn't retrieve the route details right now. However, I can suggest a general way to get from the airport to Kenmore without using the Blue Line. You could take the Silver Line bus from the airport to South Station, and then transfer to the Orange Line to Haymarket. From there, you can walk or catch a bus to Kenmore. Let me know if you need more help!",
+Route to Airport to kenmore without using Blue Line,a2a,True,200,3806,a2a,trip_planning,1.0,3781,Where are you starting from? Example: 'From Park Street to airport to kenmore',
+Where is Copley station?,auto,True,200,9617,mcp,stops,0.95,9602,"Copley Station is located in the Back Bay neighborhood of Boston. It’s situated near Copley Square, close to landmarks like the Boston Public Library and the John Hancock Tower. If you need more specific directions or details about getting there, just let me know!",
+Where is Copley station?,mcp,True,200,9632,mcp,stops,1.0,9605,"Copley station is located in the Back Bay neighborhood of Boston. It’s close to popular spots like the Boston Public Library and the Copley Square. If you need more specific directions or details, just let me know!",
+Where is Copley station?,a2a,True,200,3174,a2a,stops,1.0,3154,Agents unavailable.,
+Show me all Orange Line stops,auto,True,200,5008,mcp,stops,0.95,4917,"Here are the stops on the Orange Line:
+
+1. **Forest Hills** - Located at Washington St and Hyde Park Ave, Jamaica Plain, MA.
+2. **Green Street** - Found at 150 Green St, Jamaica Plain, MA.
+3. **Stony Brook** - Located at 100 Boylston St, Jamaica Plain, MA.
+4. **Jackson Square** - Positioned at 1500 Columbus Ave, Jamaica Plain, MA.
+5. **Roxbury Crossing** - Located at 1400 Tremont St, Roxbury, MA.
+
+Let me know if you need more information about any specific stop!",
+Show me all Orange Line stops,mcp,True,200,6251,mcp,stops,1.0,6234,"Here are the stops on the Orange Line:
+
+1. **Forest Hills** - Located at Washington St and Hyde Park Ave, Jamaica Plain, MA 02130.
+2. **Green Street** - Found at 150 Green St, Jamaica Plain, MA.
+3. **Stony Brook** - Situated at 100 Boylston St, Jamaica Plain, MA.
+4. **Jackson Square** - Located at 1500 Columbus Ave, Jamaica Plain, MA.
+5. **Roxbury Crossing** - Found at 1400 Tremont St, Roxbury, MA.
+
+These stops are accessible for wheelchair boarding. If you need more information about any specific stop, just let me know!",
+Show me all Orange Line stops,a2a,True,200,3587,a2a,stops,1.0,3569,Agents unavailable.,
+What station is closest to Northeastern University?,auto,True,200,3209,mcp,stops,0.95,3187,The closest MBTA station to Northeastern University is the Northeastern stop on the Green Line. You can also access nearby stops like the Museum of Fine Arts and Symphony stations.,
+What station is closest to Northeastern University?,mcp,True,200,3903,mcp,stops,1.0,3753,The closest MBTA station to Northeastern University is the Northeastern stop on the Green Line. You can also use the nearby Ruggles station on the Orange Line.,
+What station is closest to Northeastern University?,a2a,True,200,5664,a2a,stops,1.0,5514,Agents unavailable.,
+List all Green Line stations,auto,True,200,5740,mcp,stops,0.95,5379,"Here are the Green Line stations in Boston:
+
+1. Government Center
+2. Park Street
+3. Boylston
+4. Arlington
+5. Copley
+
+If you need more information about any specific station, feel free to ask!",
+List all Green Line stations,mcp,True,200,7511,mcp,stops,1.0,7393,"Here are the Green Line stations in Boston:
+
+1. **Government Center** - Located at Cambridge St and Court St.
+2. **Park Street** - Found at Tremont St and Winter St.
+3. **Boylston** - Situated at Boylston St and Tremont St.
+4. **Arlington** - Located at Arlington St and Boylston St.
+5. **Copley** - Found at Boylston St and Dartmouth St.
+
+This is just a selection of the stations; let me know if you need more information!",
+List all Green Line stations,a2a,True,200,3253,a2a,stops,1.0,3163,Agents unavailable.,
+Should I wait for the Red Line or take alternative?,auto,True,200,3036,a2a,alerts,0.95,3003,"Current scheduled maintenance:
+📋 Scheduled: Red Line riders can expect longer travel times on the Braintree Branch nightly from 8 PM, to end of service. This is to allow for critical signal work near JFK/UMass. 
+
+   Impact: Expect 10-15 minutes additional travel time
+   Type: signal equipment upgrades or maintenance
+",
+Should I wait for the Red Line or take alternative?,mcp,True,200,9844,mcp,alerts,1.0,9702,"It seems there was an issue retrieving the latest information about the Red Line. I recommend checking the MBTA website or app for real-time updates. If the wait looks long, you might consider alternative routes or modes of transportation.",
+Should I wait for the Red Line or take alternative?,a2a,True,200,5265,a2a,alerts,1.0,5211,"Current scheduled maintenance:
+📋 Scheduled: Red Line riders can expect longer travel times on the Braintree Branch nightly from 8 PM, to end of service. This is to allow for critical signal work near JFK/UMass. 
+
+   Impact: Expect 10-15 minutes additional travel time
+   Type: signal equipment upgrades or maintenance
+",
+"There is a medical emergency on Red Line, how long will it take?",auto,True,200,2722,a2a,alerts,0.95,2692,"Current scheduled maintenance:
+📋 Scheduled: Red Line riders can expect longer travel times on the Braintree Branch nightly from 8 PM, to end of service. This is to allow for critical signal work near JFK/UMass. 
+
+   Impact: Expect 10-15 minutes additional travel time
+   Type: signal equipment upgrades or maintenance
+",
+"There is a medical emergency on Red Line, how long will it take?",mcp,True,200,4661,mcp,alerts,1.0,4630,"I'm sorry to hear about the medical emergency on the Red Line. Unfortunately, I don't have specific information on how long it will take to resolve the situation. It's best to stay tuned for updates from the MBTA for any changes or further information regarding the service. If you need assistance, consider reaching out to on-site personnel or emergency responders.",
+"There is a medical emergency on Red Line, how long will it take?",a2a,True,200,2772,a2a,alerts,1.0,2746,"Current scheduled maintenance:
+📋 Scheduled: Red Line riders can expect longer travel times on the Braintree Branch nightly from 8 PM, to end of service. This is to allow for critical signal work near JFK/UMass. 
+
+   Impact: Expect 10-15 minutes additional travel time
+   Type: signal equipment upgrades or maintenance
+",
+Is it worth waiting for Red Line to resume or should I take Orange?,auto,True,200,3646,a2a,alerts,0.95,3623,"Current scheduled maintenance:
+📋 Scheduled: Red Line riders can expect longer travel times on the Braintree Branch nightly from 8 PM, to end of service. This is to allow for critical signal work near JFK/UMass. 
+
+   Impact: Expect 10-15 minutes additional travel time
+   Type: signal equipment upgrades or maintenance
+
+
+Where are you starting from? Example: 'From Park Street to resume'",
+Is it worth waiting for Red Line to resume or should I take Orange?,mcp,True,200,4739,mcp,alerts,1.0,4724,"Right now, the Red Line is experiencing some service issues, but you can still take the Orange Line without any major problems. If you're near Bowdoin Station, keep in mind that the escalator is out of service for maintenance, which might make it a bit challenging to access the station. If that's a concern for you, taking the Orange Line could be a more convenient option.",
+Is it worth waiting for Red Line to resume or should I take Orange?,a2a,True,200,4061,a2a,alerts,1.0,4036,"Current scheduled maintenance:
+📋 Scheduled: Red Line riders can expect longer travel times on the Braintree Branch nightly from 8 PM, to end of service. This is to allow for critical signal work near JFK/UMass. 
+
+   Impact: Expect 10-15 minutes additional travel time
+   Type: signal equipment upgrades or maintenance
+
+
+Where are you starting from? Example: 'From Park Street to resume'",
+"Red Line has delays, what should I do?",auto,True,200,2218,a2a,alerts,0.95,2206,"Current scheduled maintenance:
+📋 Scheduled: Red Line riders can expect longer travel times on the Braintree Branch nightly from 8 PM, to end of service. This is to allow for critical signal work near JFK/UMass. 
+
+   Impact: Expect 10-15 minutes additional travel time
+   Type: signal equipment upgrades or maintenance
+",
+"Red Line has delays, what should I do?",mcp,True,200,4525,mcp,alerts,1.0,4508,"It looks like there are some delays on the Red Line due to maintenance issues. Specifically, the escalator at Bowdoin Station is out of service and will be for the foreseeable future while it’s being replaced. This might complicate your travel, but you can use Government Center Station, which is less than a quarter-mile away and is fully accessible.
+
+If you're at Bowdoin Station, consider walking to Government Center for a smoother ride. If you need more assistance or information, feel free to ask!",
+"Red Line has delays, what should I do?",a2a,True,200,3616,a2a,alerts,1.0,3595,"Current scheduled maintenance:
+📋 Scheduled: Red Line riders can expect longer travel times on the Braintree Branch nightly from 8 PM, to end of service. This is to allow for critical signal work near JFK/UMass. 
+
+   Impact: Expect 10-15 minutes additional travel time
+   Type: signal equipment upgrades or maintenance
+",
+Red Line delays?,auto,True,200,4276,mcp,alerts,0.95,4261,"There are delays on the Red Line, especially on the Braintree Branch, due to essential signal maintenance work near JFK/UMass. This will cause longer travel times starting at 8 PM until the end of service, and you should plan for an additional 10 to 15 minutes on your trip. This work will continue through March 14, with the next phase beginning on March 15. If you want more details, you can check the [MBTA website](http://mbta.com/ColumbiaJunction).",
+Red Line delays?,mcp,True,200,5539,mcp,alerts,1.0,5518,"There are some delays on the Red Line, particularly affecting the Braintree Branch. Starting at 8 PM each night until the end of service, you can expect longer travel times due to important signal work near JFK/UMass. This maintenance work is part of a larger project to modernize the signals in that area, which were damaged in a previous incident.
+
+Please plan for an additional 10 to 15 minutes for your trip. This situation is expected to last through March 14, with the next phase of work likely starting on March 15. For more details, you can visit [this link](http://mbta.com/ColumbiaJunction).",
+Red Line delays?,a2a,True,200,3614,a2a,alerts,1.0,3547,"Current scheduled maintenance:
+📋 Scheduled: Red Line riders can expect longer travel times on the Braintree Branch nightly from 8 PM, to end of service. This is to allow for critical signal work near JFK/UMass. ",
+Next train at Park Street?,auto,True,200,3230,mcp,alerts,0.95,3208,It looks like there are currently no upcoming trains at Park Street. You might want to check back shortly for updates!,
+Next train at Park Street?,mcp,True,200,3173,mcp,alerts,1.0,3151,It looks like there are currently no trains scheduled to arrive at Park Street. You might want to check back in a bit!,
+Next train at Park Street?,a2a,True,200,3193,a2a,alerts,1.0,3181,Agents unavailable.,
+Where are Orange Line trains?,auto,True,200,4182,mcp,stops,0.95,4157,It looks like I wasn't able to get the current locations of the Orange Line trains right now. You might want to check the MBTA's website or app for real-time updates on train locations.,
+Where are Orange Line trains?,mcp,True,200,3353,mcp,stops,1.0,3340,It seems there was an issue retrieving the current locations of the Orange Line trains. Please try again later or check the MBTA website for real-time updates.,
+Where are Orange Line trains?,a2a,True,200,3707,a2a,alerts,1.0,3686,✅ No current transit delays on Orange Line.,
+List all MBTA routes,auto,True,200,5127,mcp,stops,0.95,5103,"Sure! Here are some of the MBTA routes you can take:
+
+1. **Red Line**: This rapid transit line heads to Ashmont/Braintree and Alewife.
+2. **Mattapan Line**: This line connects Mattapan and Ashmont.
+3. **Orange Line**: It goes to Forest Hills and Oak Grove.
+4. **Green Line B**: This line runs between Boston College and Government Center.
+5. **Green Line C**: It travels from Cleveland Circle to Government Center.
+
+Let me know if you need more information about any specific route!",
+List all MBTA routes,mcp,True,200,5069,mcp,stops,1.0,5049,"Here are some of the MBTA routes you can take:
+
+1. **Red Line**: Travels between Ashmont/Braintree and Alewife.
+2. **Mattapan Line**: Connects Mattapan and Ashmont.
+3. **Orange Line**: Runs from Forest Hills to Oak Grove.
+4. **Green Line B**: Goes from Boston College to Government Center.
+5. **Green Line C**: Travels between Cleveland Circle and Government Center.
+6. **Green Line D**: Connects Riverside to Government Center.
+
+If you need more details about any specific route, just let me know!",
+List all MBTA routes,a2a,True,200,2776,a2a,stops,1.0,2759,I specialize in MBTA transit.,
+What are the Red Line alerts?,auto,True,200,5976,mcp,alerts,0.95,5933,"There are alerts for the Red Line that you should know about. From now until March 14, riders on the Braintree Branch can expect longer travel times starting at 8 PM each night due to necessary signal work near JFK/UMass. This work is part of a signal modernization project following damage from a derailment in 2019. 
+
+Please plan for an additional 10 to 15 minutes of travel time during this period. The next phase of this work is expected to start on March 15. For more details, you can visit [this link](http://mbta.com/ColumbiaJunction).",
+What are the Red Line alerts?,mcp,True,200,4810,mcp,alerts,1.0,4795,"There are ongoing alerts for the Red Line that will affect your travel. Starting from 8 PM each night until the end of service, expect longer travel times on the Braintree Branch due to critical signal work near JFK/UMass. This work is part of a signal modernization project because of damage from a derailment in 2019.
+
+You should plan for an additional 10 to 15 minutes for your trips during this time. The current phase of this maintenance work will continue through March 14, and another phase is expected to begin on March 15. For more details, you can visit [this link](http://mbta.com/ColumbiaJunction).",
+What are the Red Line alerts?,a2a,True,200,4278,a2a,alerts,1.0,4260,"Current scheduled maintenance:
+📋 Scheduled: Red Line riders can expect longer travel times on the Braintree Branch nightly from 8 PM, to end of service. This is to allow for critical signal work near JFK/UMass. ",
+Give me two route options from South Station to Kenmore,auto,True,200,11609,a2a,trip_planning,0.95,11578,"Current scheduled maintenance:
+📋 Scheduled: Red Line riders can expect longer travel times on the Braintree Branch nightly from 8 PM, to end of service. This is to allow for critical signal work near JFK/UMass. 
+
+🧠 **Routing Based on Current Conditions:**
+
+
+### Route Option 1
+
+- **Lines Used:** Red Line → Green Line
+- **Transfers:** 1 transfer at Park Street
+
+**Stops & Time:**
+1. **South Station** (Red Line) → Park Street (Approx. 5 minutes)
+2. **Transfer at Park Street** (Red Line to Green Line)
+3. **Park Street** → Kenmore (Green Line) (Approx. 10 minutes)
+
+**Total Time:** Approx. 15 minutes
+
+---
+
+### Route Option 2
+
+- **Lines Used:** Orange Line → Green Line
+- **Transfers:** 1 transfer at North Station
+
+**Stops & Time:**
+1. **South Station** (Orange Line) → North Station (Approx. 2 minutes)
+2. **Transfer at North Station** (Orange Line to Green Line)
+3. **North Station** → Kenmore (Green Line) (Approx. 15 minutes)
+
+**Total Time:** Approx. 17 minutes
+
+--- 
+
+Both options provide efficient routes to Kenmore, with slight variations in time depending on transfer points.
+
+✅ Route planning complete",
+Give me two route options from South Station to Kenmore,mcp,True,200,6123,mcp,trip_planning,1.0,6108,"It seems there was an issue retrieving the route options from South Station to Kenmore. However, I can suggest two common ways to make that trip:
+
+1. **Subway**: You can take the Red Line from South Station towards Alewife, then transfer at Park Street to the Green Line (C or D branch) towards Kenmore.
+
+2. **Bus**: Alternatively, you can take the 47 bus from South Station directly to Kenmore.
+
+Let me know if you need more help!",
+Give me two route options from South Station to Kenmore,a2a,True,200,18663,a2a,trip_planning,1.0,18599,"Current scheduled maintenance:
+📋 Scheduled: Red Line riders can expect longer travel times on the Braintree Branch nightly from 8 PM, to end of service. This is to allow for critical signal work near JFK/UMass. 
+
+🧠 **Routing Based on Current Conditions:**
+
+
+Here are two different route options from South Station to Kenmore using the MBTA system:
+
+### Option 1
+- **Lines Used**: Red Line → Green Line (B, C, D, or E branch)
+- **Transfers**: 1 transfer at Park Street
+- **Stops & Time**:
+  1. **Board the Red Line at South Station** (towards Alewife)
+  2. **Travel to Park Street** (1 stop, ~2 minutes)
+  3. **Transfer to the Green Line at Park Street**
+  4. **Board the Green Line (any branch) towards Kenmore**
+  5. **Travel to Kenmore** (approximately 4 stops, ~10 minutes)
+  
+**Total Travel Time**: ~12 minutes (including transfer time)
+
+---
+
+### Option 2
+- **Lines Used**: Red Line → Orange Line → Green Line (B, C, D, or E branch)
+- **Transfers**: 2 transfers (1 at Downtown Crossing and 1 at Park Street)
+- **Stops & Time**:
+  1. **Board the Red Line at South Station** (towards Alewife)
+  2. **Travel to Downtown Crossing** (1 stop, ~2 minutes)
+  3. **Transfer to the Orange Line at Downtown Crossing**
+  4. **Board the Orange Line towards Forest Hills**
+  5. **Travel to Park Street** (3 stops, ~5 minutes)
+  6. **Transfer to the Green Line at Park Street**
+  7. **Board the Green Line (any branch) towards Kenmore**
+  8. **Travel to Kenmore** (approximately 4 stops, ~10 minutes)
+
+**Total Travel Time**: ~22 minutes (including transfer time)
+
+Feel free to choose the option that works best for your needs!
+
+✅ Route planning complete",
+"Give me two routes to Harvard, show which is less crowded",auto,True,200,5092,a2a,trip_planning,0.9,5041,Where are you starting from? Example: 'From Park Street to harvard',
+"Give me two routes to Harvard, show which is less crowded",mcp,True,200,5589,mcp,trip_planning,1.0,5487,"It seems there was an error retrieving the information. However, I can help you find two routes to Harvard and let you know which one is typically less crowded. 
+
+One common route is to take the Red Line to Harvard Station, which is often busy during peak hours. Another option is to take the bus route 47, which can be less crowded, especially during off-peak times. 
+
+Let me know if you need more details on schedules or other options!",
+"Give me two routes to Harvard, show which is less crowded",a2a,True,200,6010,a2a,trip_planning,1.0,5992,Where are you starting from? Example: 'From Park Street to harvard',
+"Route from Fenway Park to South Station, is it crowded?",auto,True,200,7152,a2a,trip_planning,0.9,7053,,
+"Route from Fenway Park to South Station, is it crowded?",mcp,True,200,5115,mcp,trip_planning,1.0,5037,"I couldn't get the latest information on the crowd levels for your trip from Fenway Park to South Station. However, I recommend checking the MBTA website or app for real-time updates. Generally, trips during peak hours can be busier, so keep that in mind!",
+"Route from Fenway Park to South Station, is it crowded?",a2a,True,200,7446,a2a,trip_planning,1.0,7333,,
+Route to MIT avoiding delays and crowds,auto,True,200,7228,a2a,trip_planning,0.9,7171,Where are you starting from? Example: 'From Park Street to mit',
+Route to MIT avoiding delays and crowds,mcp,True,200,4883,mcp,trip_planning,1.0,4836,"It looks like I couldn't retrieve the information you need right now. However, to avoid delays and crowds on your way to MIT, consider traveling during off-peak hours, using real-time transit updates to check for any service changes, and possibly taking a less crowded route or mode of transportation. If you have a specific starting point, I can help you plan a route!",
+Route to MIT avoiding delays and crowds,a2a,True,200,4558,a2a,trip_planning,1.0,4522,Where are you starting from? Example: 'From Park Street to mit',
+"I need to get to Logan Airport quickly, which line is least crowded?",auto,True,200,2875,a2a,alerts,0.95,2847,Where are you starting from? Example: 'From Park Street to logan airport',
+"I need to get to Logan Airport quickly, which line is least crowded?",mcp,True,200,8344,mcp,alerts,1.0,8319,"I'm sorry, but I couldn't get the current crowd information for the lines to Logan Airport. However, I recommend checking the MBTA's official website or app for real-time updates on crowd levels. In general, the Silver Line is a popular choice for getting to the airport quickly.",
+"I need to get to Logan Airport quickly, which line is least crowded?",a2a,True,200,3453,a2a,alerts,1.0,3445,Where are you starting from? Example: 'From Park Street to logan airport',
+How do I get to that baseball stadium?,auto,True,200,5268,a2a,general,0.95,5239,,
+How do I get to that baseball stadium?,mcp,True,200,3854,mcp,general,1.0,3817,"It seems there was an issue retrieving specific directions. However, I can help you get to the baseball stadium! Could you please tell me your starting location?",
+How do I get to that baseball stadium?,a2a,True,200,6068,a2a,general,1.0,6035,,
+Route from Park to Kendall,auto,True,200,5504,a2a,trip_planning,0.95,5465,,
+Route from Park to Kendall,mcp,True,200,4305,mcp,trip_planning,1.0,4280,"It seems there was an issue retrieving the route information from Park to Kendall. However, you can take the Red Line from Park Street Station towards Alewife, and get off at Kendall/MIT Station. This should get you there smoothly! If you need more help, feel free to ask!",
+Route from Park to Kendall,a2a,True,200,4734,a2a,trip_planning,1.0,4711,,
+What is the weather in Boston?,auto,True,200,2152,a2a,general,0.95,2130,I specialize in MBTA transit.,
+What is the weather in Boston?,mcp,True,200,4392,mcp,general,1.0,4368,"I'm sorry, but I can't provide the current weather in Boston at the moment. You might want to check a weather website or app for the latest updates.",
+What is the weather in Boston?,a2a,True,200,2576,a2a,general,1.0,2540,I specialize in MBTA transit.,
+Hello!,auto,True,200,2328,a2a,general,0.0,2293,"Hello! I help with MBTA routes, alerts, and stops.",
+Hello!,mcp,True,200,7964,mcp,general,1.0,7944,"Hello! It looks like you're interested in the MBTA routes. Here are some of the main lines:
+
+1. **Red Line**: This is a rapid transit line that goes to Ashmont/Braintree and Alewife. It runs in the south and north directions.
+
+2. **Orange Line**: Another rapid transit option that travels between Forest Hills and Oak Grove, also in south and north directions.
+
+3. **Green Line B**: This line runs from Boston College to Government Center, going west and east.
+
+4. **Green Line C**: Similar to the B line, but it travels to Cleveland Circle from Government Center.
+
+5. **Mattapan Line**: This line connects Mattapan to Ashmont, moving outbound and inbound.
+
+If you need more details or have specific questions about any route, feel free to ask!",
+Hello!,a2a,True,200,3408,a2a,general,1.0,3377,"Hello! I help with MBTA routes, alerts, and stops.",
+Route from Harvard to South Station,auto,True,200,4749,a2a,trip_planning,0.95,4721,"Current scheduled maintenance:
+📋 Scheduled: Red Line riders can expect longer travel times on the Braintree Branch nightly from 8 PM, to end of service. This is to allow for critical signal work near JFK/UMass. 
+
+Take the Red Line from Harvard to South Station.
+
+✅ Route planning complete",
+Route from Harvard to South Station,mcp,True,200,4765,mcp,trip_planning,1.0,4729,"It looks like I couldn't get the route details at the moment. However, you can take the Red Line from Harvard Square to South Station. Just hop on the train heading towards Ashmont or Braintree, and you'll reach your destination in about 15-20 minutes. If you need more help, just let me know!",
+Route from Harvard to South Station,a2a,True,200,4950,a2a,trip_planning,1.0,4923,"Current scheduled maintenance:
+📋 Scheduled: Red Line riders can expect longer travel times on the Braintree Branch nightly from 8 PM, to end of service. This is to allow for critical signal work near JFK/UMass. 
+
+Take the Red Line from Harvard to South Station.
+
+✅ Route planning complete",
+Route from Park to Harvard,auto,True,200,6380,a2a,trip_planning,0.95,6330,,
+Route from Park to Harvard,mcp,True,200,3938,mcp,trip_planning,1.0,3913,"It seems there’s an issue retrieving the route information right now. However, to travel from Park to Harvard, you can take the subway. A common route is to take the Red Line from Park Street to Alewife and then transfer to the Alewife-bound train. If you need more specific directions, let me know!",
+Route from Park to Harvard,a2a,True,200,7455,a2a,trip_planning,1.0,7439,,
+Hi,auto,True,200,51,shortcut,greeting,1.0,38,Hi! I can help with Boston MBTA transit info.,
+Hi,mcp,True,200,4452,mcp,greeting,1.0,4443,"Hello! The MBTA has several rapid transit lines you can use to get around. Here are some of the main ones:
+
+1. **Red Line**: This line goes to Ashmont/Braintree and Alewife. It's a key route for many commuters.
+   
+2. **Mattapan Line**: This connects Mattapan and Ashmont, providing a vital link in the area.
+
+3. **Orange Line**: It runs between Forest Hills and Oak Grove, serving a busy corridor.
+
+4. **Green Line B**: This line travels from Boston College to Government Center.
+
+5. **Green Line C**: It goes from Cleveland Circle to Government Center.
+
+If you need more specific information or help with directions, just let me know!",
+Hi,a2a,True,200,623,a2a,greeting,1.0,612,"Hello! I help with MBTA routes, alerts, and stops.",
+Park Street to Harvard,auto,True,200,3810,a2a,trip_planning,0.95,3777,"Current scheduled maintenance:
+📋 Scheduled: Red Line riders can expect longer travel times on the Braintree Branch nightly from 8 PM, to end of service. This is to allow for critical signal work near JFK/UMass. 
+
+Where are you starting from? Example: 'From Park Street to harvard'",
+Park Street to Harvard,mcp,True,200,4376,mcp,trip_planning,1.0,4359,"It seems there was an issue with retrieving the trip information from Park Street to Harvard. However, you can easily take the Red Line from Park Street Station towards Alewife and get off at the Harvard Station. If you need more detailed directions or information, just let me know!",
+Park Street to Harvard,a2a,True,200,3595,a2a,trip_planning,1.0,3585,"Current scheduled maintenance:
+📋 Scheduled: Red Line riders can expect longer travel times on the Braintree Branch nightly from 8 PM, to end of service. This is to allow for critical signal work near JFK/UMass. 
+
+Where are you starting from? Example: 'From Park Street to harvard'",
+Fenway Park to South Station,auto,True,200,3784,a2a,trip_planning,0.95,3773,"Current scheduled maintenance:
+📋 Scheduled: Red Line riders can expect longer travel times on the Braintree Branch nightly from 8 PM, to end of service. This is to allow for critical signal work near JFK/UMass. 
+
+Where are you starting from? Example: 'From Park Street to south station'",
+Fenway Park to South Station,mcp,True,200,6847,mcp,trip_planning,1.0,6839,"It looks like there was an issue retrieving the information for your trip from Fenway Park to South Station. However, I can help you with directions! You can take the Green Line from Fenway Park to Kenmore, then transfer to the B, C, or D lines to get to Park Street. From there, switch to the Red Line towards Ashmont or Braintree, and you'll arrive at South Station. Let me know if you need more help!",
+Fenway Park to South Station,a2a,True,200,7681,a2a,trip_planning,1.0,7650,"Current scheduled maintenance:
+📋 Scheduled: Red Line riders can expect longer travel times on the Braintree Branch nightly from 8 PM, to end of service. This is to allow for critical signal work near JFK/UMass. 
+
+Where are you starting from? Example: 'From Park Street to south station'",
+How crowded is Red Line?,auto,True,200,7225,a2a,alerts,0.95,7196,"🟡 **Red Line Crowding: MODERATE**
+
+📊 Overall: 50% average occupancy across 2 trains
+
+Trains moderately busy. You'll likely find a seat.
+
+ℹ️ *Data from MBTA real-time vehicle occupancy sensors (updated every 10-30 seconds)*",
+How crowded is Red Line?,mcp,True,200,13863,mcp,alerts,1.0,13813,"I couldn't get the latest information on how crowded the Red Line is right now. For the most accurate updates, you might want to check the MBTA website or their app directly.",
+How crowded is Red Line?,a2a,True,200,2454,a2a,alerts,1.0,2440,"🟡 **Red Line Crowding: MODERATE**
+
+📊 Overall: 50% average occupancy across 2 trains
+
+Trains moderately busy. You'll likely find a seat.
+
+ℹ️ *Data from MBTA real-time vehicle occupancy sensors (updated every 10-30 seconds)*",
+How long do medical delays usually last?,auto,True,200,2210,a2a,alerts,0.95,2196,"Based on analysis of 1,953 medical emergencies from MBTA data (2020-2023):
+
+• Typical duration: 33 minutes (median)
+• Range: 23-63 minutes (25th-75th percentile)
+• Average: 72 minutes
+
+This data shows medical emergencies usually resolve within this timeframe, though individual incidents vary.
+
+ℹ️ *Based on historical MBTA data (41,970 incidents, 2020-2023). Individual incidents may differ. Not a prediction of current delay duration.*",
+How long do medical delays usually last?,mcp,True,200,5681,mcp,alerts,1.0,5671,"Medical delays can vary in length, and there isn't a set duration for how long they usually last. Each situation is unique, and the time it takes to resolve a delay can depend on various factors. If you're experiencing a specific delay, it's best to check for updates directly related to that incident.",
+How long do medical delays usually last?,a2a,True,200,2395,a2a,alerts,1.0,2385,"Based on analysis of 1,953 medical emergencies from MBTA data (2020-2023):
+
+• Typical duration: 33 minutes (median)
+• Range: 23-63 minutes (25th-75th percentile)
+• Average: 72 minutes
+
+This data shows medical emergencies usually resolve within this timeframe, though individual incidents vary.
+
+ℹ️ *Based on historical MBTA data (41,970 incidents, 2020-2023). Individual incidents may differ. Not a prediction of current delay duration.*",
+How crowded is Blue Line?,auto,True,200,3209,a2a,alerts,0.95,3179,"🟡 **Blue Line Crowding: MODERATE**
+
+📊 Overall: 50% average occupancy across 1 trains
+
+Trains moderately busy. You'll likely find a seat.
+
+ℹ️ *Data from MBTA real-time vehicle occupancy sensors (updated every 10-30 seconds)*",
+How crowded is Blue Line?,mcp,True,200,11314,mcp,alerts,1.0,11287,It seems I couldn't get the latest information on how crowded the Blue Line is right now. You might want to check the MBTA website or app for real-time updates.,
+How crowded is Blue Line?,a2a,True,200,3284,a2a,alerts,1.0,3246,"🟡 **Blue Line Crowding: MODERATE**
+
+📊 Overall: 50% average occupancy across 1 trains
+
+Trains moderately busy. You'll likely find a seat.
+
+ℹ️ *Data from MBTA real-time vehicle occupancy sensors (updated every 10-30 seconds)*",

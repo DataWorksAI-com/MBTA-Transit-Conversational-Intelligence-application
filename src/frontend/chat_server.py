@@ -738,6 +738,24 @@ async def get_ui():
                 input.value = '';
             }
         }
+
+        function escapeHtml(value) {
+            return String(value)
+                .replace(/&/g, '&amp;')
+                .replace(/</g, '&lt;')
+                .replace(/>/g, '&gt;')
+                .replace(/"/g, '&quot;')
+                .replace(/'/g, '&#39;');
+        }
+
+        function formatAssistantContent(content) {
+            let text = escapeHtml(content || '');
+            text = text.replace(/\\r\\n/g, '\\n');
+            text = text.replace(/\\*\\*(.*?)\\*\\*/g, '<strong>$1</strong>');
+            text = text.replace(/(^|\\n)\\?\\?\\s+/g, '$1• ');
+            text = text.replace(/(^|\\n)-\\s+/g, '$1• ');
+            return text.replace(/\\n/g, '<br>');
+        }
         
         function addMessage(role, content, metadata = {}) {
             const messagesDiv = document.getElementById('messages');
@@ -751,7 +769,11 @@ async def get_ui():
             
             const contentDiv = document.createElement('div');
             contentDiv.className = 'message-content';
-            contentDiv.textContent = content;
+            if (role === 'assistant') {
+                contentDiv.innerHTML = formatAssistantContent(content);
+            } else {
+                contentDiv.textContent = content;
+            }
             
             if (metadata.agents_called && metadata.agents_called.length > 0) {
                 const metadataDiv = document.createElement('div');

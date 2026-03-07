@@ -101,7 +101,7 @@ def extract_origin_destination(query: str) -> Dict[str, str]:
     if match:
         result["origin"] = match.group(1).strip()
         result["destination"] = match.group(2).strip()
-        logger.info(f"? PARSED (pattern 1): origin='{result['origin']}', dest='{result['destination']}'")
+        logger.info(f"✓ PARSED (pattern 1): origin='{result['origin']}', dest='{result['destination']}'")
         return result
     
     # Pattern 2: "route from X to Y" or "from X to Y"
@@ -109,17 +109,17 @@ def extract_origin_destination(query: str) -> Dict[str, str]:
     if match:
         result["origin"] = match.group(1).strip()
         result["destination"] = match.group(2).strip()
-        logger.info(f"? PARSED (pattern 2): origin='{result['origin']}', dest='{result['destination']}'")
+        logger.info(f"✓ PARSED (pattern 2): origin='{result['origin']}', dest='{result['destination']}'")
         return result
     
     # Pattern 3: "get to Y" or "to Y"
     match = re.search(r"(?:get |go )?to (.+?)(?:\s+in time|\s+for|\s+\.|$)", q)
     if match:
         result["destination"] = match.group(1).strip()
-        logger.info(f"? PARSED (pattern 3): dest='{result['destination']}'")
+        logger.info(f"✓ PARSED (pattern 3): dest='{result['destination']}'")
         return result
     
-    logger.warning(f"?? No parse match for: '{query}'")
+    logger.warning(f"⚠️ No parse match for: '{query}'")
     return result
 
 
@@ -159,13 +159,13 @@ def is_likely_station_name(text: str) -> bool:
     ]
     
     if any(indicator in text_lower for indicator in station_indicators):
-        logger.info(f"? '{text}' looks like a station name (skipping resolution)")
+        logger.info(f"✓ '{text}' looks like a station name (skipping resolution)")
         return True
     
     if len(text.split()) <= 2 and len(text) < 20:
         return False
     
-    logger.info(f"? '{text}' looks like a landmark (needs resolution)")
+    logger.info(f"✓ '{text}' looks like a landmark (needs resolution)")
     return False
 
 
@@ -176,11 +176,11 @@ def extract_station_from_stopfinder(text: str) -> str:
     if match:
         station = match.group(1).strip()
         station = re.sub(r' in [A-Z][a-z]+', '', station)
-        station = station.split('\n')[0].split('??')[0].strip()
+        station = station.split('\n')[0].split('📍')[0].strip()
         return station
     
     # Pattern: "1. Station Name (City)"
-    match = re.search(r'^\d+\.\s+([^(?\n]+)', text, re.MULTILINE)
+    match = re.search(r'^\d+\.\s+([^(♿\n]+)', text, re.MULTILINE)
     if match:
         return match.group(1).strip()
     
@@ -207,7 +207,7 @@ def extract_alerts_domain_analysis(alerts_response: str) -> Dict[str, Any]:
         return analysis
     
     # Detect if it's just scheduled maintenance (not severe disruption)
-    is_scheduled = "scheduled" in alerts_response.lower() or "??" in alerts_response
+    is_scheduled = "scheduled" in alerts_response.lower() or "📋" in alerts_response
     
     # Extract delay impact for scheduled work
     impact_match = re.search(r"(\d+)-(\d+)\s*minutes?\s*additional", alerts_response.lower())
@@ -234,24 +234,24 @@ def extract_alerts_domain_analysis(alerts_response: str) -> Dict[str, Any]:
             # Minor scheduled work - don't avoid route
             analysis["should_avoid_routes"] = []
             analysis["overall_recommendation"] = "allow_extra_time"
-            logger.info(f"? Scheduled work with minor impact - route still usable")
+            logger.info(f"✓ Scheduled work with minor impact - route still usable")
         else:
             # Major scheduled work - might avoid
             analysis["should_avoid_routes"] = analysis["affected_routes"]
             analysis["overall_recommendation"] = "consider_alternative"
-            logger.info(f"? Major scheduled work - consider alternatives")
+            logger.info(f"✓ Major scheduled work - consider alternatives")
     else:
         # Active incident - check severity
-        if "??" in alerts_response or "critical" in alerts_response.lower():
+        if "🔴" in alerts_response or "critical" in alerts_response.lower():
             analysis["severity"] = "critical"
             analysis["should_avoid_routes"] = analysis["affected_routes"]
             analysis["overall_recommendation"] = "take_alternative"
-        elif "??" in alerts_response or "major" in alerts_response.lower():
+        elif "🟠" in alerts_response or "major" in alerts_response.lower():
             analysis["severity"] = "major"
             analysis["should_avoid_routes"] = analysis["affected_routes"]
             analysis["overall_recommendation"] = "take_alternative"
     
-    logger.info(f"? Context: severity={analysis['severity']}, avoid={analysis['should_avoid_routes']}, impact={analysis['delay_impact']}")
+    logger.info(f"✓ Context: severity={analysis['severity']}, avoid={analysis['should_avoid_routes']}, impact={analysis['delay_impact']}")
     
     return analysis
 
@@ -297,7 +297,7 @@ async def get_agent_catalog() -> List[Dict]:
             
             _agent_catalog_cache = agents
             _catalog_cache_time = datetime.now()
-            logger.info(f"? Registry: {len(agents)} agents")
+            logger.info(f"✓ Registry: {len(agents)} agents")
             return agents
     except:
         return []
@@ -319,17 +319,17 @@ Available Agents:
 {catalog_text}
 
 MATCHING RULES:
-1. If query is ONLY about alerts/delays/disruptions/crowding/occupancy (no routing) ? ONLY alerts agent
-   Examples: "Red Line delays?", "Should I wait?", "How long will delays last?", "Why delays?", "How crowded is Red Line right now?"
+1. If query is ONLY about alerts/delays/disruptions (no routing) → ONLY alerts agent
+   Examples: "Red Line delays?", "Should I wait?", "How long will delays last?", "Why delays?"
 
-2. If query asks for route/directions with origin and destination ? stopfinder + alerts + planner
+2. If query asks for route/directions with origin and destination → stopfinder + alerts + planner
    Examples: "Route from Park to Harvard", "Get from X to Y", "How do I get to Harvard?"
 
-3. If query asks about stops/stations (no routing) ? ONLY stopfinder agent
+3. If query asks about stops/stations (no routing) → ONLY stopfinder agent
    Examples: "Find Harvard station", "Stops on Red Line"
 
 DO NOT match planner agent for queries that don't have explicit routing intent (from X to Y).
-DO NOT match planner for queries asking about delay duration, wait times, disruption analysis, or crowding levels.
+DO NOT match planner for queries asking about delay duration, wait times, or disruption analysis.
 
 Return JSON with ONLY the agents truly needed: {{"matched_agents": ["id1", "id2"]}}
 """
@@ -369,7 +369,7 @@ Return JSON with ONLY the agents truly needed: {{"matched_agents": ["id1", "id2"
                     capabilities=ainfo.get('capabilities', [])
                 ))
         
-        logger.info(f"? Discovery: {matched_ids}")
+        logger.info(f"✓ Discovery: {matched_ids}")
         return configs
     except:
         return []
@@ -434,7 +434,7 @@ async def call_stopfinder_for_location(location: str, config: AgentConfig, conv_
         response_text = result.get("response", "")
         station = extract_station_from_stopfinder(response_text)
         
-        logger.info(f"   '{location}' ? '{station}'")
+        logger.info(f"   '{location}' → '{station}'")
         return station
         
     except Exception as e:
@@ -497,11 +497,11 @@ def routing_node(state: AgentState) -> AgentState:
     intent = state["intent"]
     matched = state.get("matched_agents", [])
     
-    logger.info(f"?? Routing: {intent}")
+    logger.info(f"🎯 Routing: {intent}")
     
     # Check if 3 agents matched (means trip planning)
     if intent == "trip_planning" or len(matched) >= 3:
-        # Order: stopfinder ? alerts ? planner
+        # Order: stopfinder → alerts → planner
         ordered = []
         
         for a in matched:
@@ -520,7 +520,7 @@ def routing_node(state: AgentState) -> AgentState:
         state["matched_agents"] = list(dict.fromkeys(ordered))
         state["routing_decision"] = "FULL_CHAIN"
         
-        logger.info(f"? Chain: {' ? '.join(state['matched_agents'])}")
+        logger.info(f"✓ Chain: {' → '.join(state['matched_agents'])}")
     
     return state
 
@@ -547,7 +547,7 @@ async def execute_agents_node(state: AgentState) -> AgentState:
         origin = state.get("origin_text", "")
         destination = state.get("destination_text", "")
         
-        logger.info(f"?? Execute: {' ? '.join(matched)}")
+        logger.info(f"🔄 Execute: {' → '.join(matched)}")
         logger.info(f"   Origin: '{origin}', Dest: '{destination}'")
         
         # OPTIMIZATION: Check if they're already station names
@@ -579,7 +579,7 @@ async def execute_agents_node(state: AgentState) -> AgentState:
                     capabilities=ainfo.get('capabilities', [])
                 )
                 
-                logger.info(f"?? Resolving landmarks with StopFinder...")
+                logger.info(f"📍 Resolving landmarks with StopFinder...")
                 
                 if origin and not origin_is_station:
                     logger.info(f"   Resolving origin landmark: '{origin}'")
@@ -598,14 +598,14 @@ async def execute_agents_node(state: AgentState) -> AgentState:
                 final_origin = resolved_origin if resolved_origin else origin
                 final_destination = resolved_destination if resolved_destination else destination
                 
-                logger.info(f"? Final stations: '{final_origin}' ? '{final_destination}'")
+                logger.info(f"✓ Final stations: '{final_origin}' → '{final_destination}'")
                 
                 if (origin and not origin_is_station) or (destination and not dest_is_station):
                     agents_called.append(stopfinder_id)
         else:
             resolved_origin = origin
             resolved_destination = destination
-            logger.info(f"? Both are stations, using as-is: '{origin}' ? '{destination}'")
+            logger.info(f"✓ Both are stations, using as-is: '{origin}' → '{destination}'")
         
         # STEP 2: Execute remaining agents (Alerts and Planner)
         # NEW: Track full domain analysis from Alerts Agent
@@ -635,7 +635,7 @@ async def execute_agents_node(state: AgentState) -> AgentState:
             # Construct query
             if agent_id == "mbta-alerts":
                 agent_query = state["user_message"]  # Pass full query for context
-                logger.info(f"?? Alerts Agent")
+                logger.info(f"⚠️ Alerts Agent")
             
             elif agent_id in ["mbta-planner", "mbta-route-planner"]:
                 # Planner: Use RESOLVED station names + alerts context
@@ -680,7 +680,7 @@ Plan the route between these stations."""
                 
                 # NEW: Add alerts domain analysis context if available
                 if alerts_analysis:
-                    logger.info(f"?? Passing alerts analysis to Planner:")
+                    logger.info(f"🧠 Passing alerts analysis to Planner:")
                     logger.info(f"   Recommendation: {alerts_analysis.get('overall_recommendation')}")
                     logger.info(f"   Severity: {alerts_analysis.get('severity')}")
                     logger.info(f"   Avoid routes: {alerts_analysis.get('should_avoid_routes')}")
@@ -696,12 +696,12 @@ Plan the route between these stations."""
                     if alerts_analysis.get('overall_recommendation') == 'take_alternative':
                         agent_query += f"\n- CRITICAL: Major disruptions detected, prioritize alternative routes"
                 
-                logger.info(f"??? Planner with context")
+                logger.info(f"🗺️ Planner with context")
             
             else:
                 agent_query = state["user_message"]
             
-            logger.info(f"?? [{idx+1}] {agent_id}")
+            logger.info(f"📞 [{idx+1}] {agent_id}")
             
             with tracer.start_as_current_span(f"agent_{agent_id}"):
                 try:
@@ -721,27 +721,27 @@ Plan the route between these stations."""
                         alerts_analysis = extract_alerts_domain_analysis(resp_text)
                         
                         # Also extract simple disruption markers
-                        if "??" in resp_text or "??" in resp_text:
+                        if "🔴" in resp_text or "🟠" in resp_text:
                             has_disruptions = True
                             
                             for route in ["Red Line", "Orange Line", "Blue Line", "Green Line"]:
                                 if route in resp_text:
                                     affected.append(route)
                             
-                            if "??" in resp_text:
+                            if "🔴" in resp_text:
                                 severity = "critical"
-                            elif "??" in resp_text:
+                            elif "🟠" in resp_text:
                                 severity = "major"
                             
-                            logger.info(f"?? Disruptions: {affected}, severity={severity}")
+                            logger.info(f"⚠️ Disruptions: {affected}, severity={severity}")
                         else:
-                            logger.info(f"? No major disruptions")
+                            logger.info(f"✓ No major disruptions")
                     
                     responses.append(result)
                     agents_called.append(agent_id)
                     
                 except Exception as e:
-                    logger.error(f"? {agent_id}: {e}")
+                    logger.error(f"❌ {agent_id}: {e}")
                     responses.append({"response": f"Error: {e}", "error": True})
                     agents_called.append(f"{agent_id}_error")
         
@@ -764,122 +764,120 @@ Plan the route between these stations."""
 
 
 async def synthesize_node(state: AgentState) -> AgentState:
-    """Intelligent synthesis"""
+    """
+    FIXED synthesis v4.5 - Prevents over-synthesizing
+    
+    RULES:
+    1. Single agent → Return directly (NO synthesis!)
+    2. Alerts + Planner (no issues) → Return planner only
+    3. Alerts + Planner (has issues) → Simple combination
+    4. Full chain → Minimal synthesis or direct return
+    """
     with tracer.start_as_current_span("synthesize"):
+        # Handle no agents
         if not state.get("matched_agents"):
             msg = state["user_message"].lower()
             if any(w in msg for w in ["hi", "hello", "hey"]):
-                return {**state, "final_response": "Hello! I help with MBTA routes, alerts, and stops. What do you need?", "should_end": True}
-            return {**state, "final_response": "I specialize in MBTA transit. Ask about routes, alerts, or stops!", "should_end": True}
+                return {**state, "final_response": "Hello! I help with MBTA routes, alerts, and stops.", "should_end": True}
+            return {**state, "final_response": "I specialize in MBTA transit.", "should_end": True}
         
         responses = [r.get("response", "") for r in state.get("agent_responses", []) if not r.get('error') and r.get("response")]
         
         if not responses:
             return {**state, "final_response": "Agents unavailable.", "should_end": True}
         
-        # Get agent types that were called
         agents_called_list = state.get("agents_called", [])
+        
+        # ================================================================
+        # RULE 1: Single agent → Direct return
+        # ================================================================
+        if len(agents_called_list) == 1:
+            response = responses[0]
+            if isinstance(response, dict):
+                response = response.get("response", str(response))
+            
+            logger.info(f"📍 Single agent - direct return (no synthesis)")
+            return {**state, "final_response": response, "should_end": True}
+        
+        # ================================================================
+        # RULE 2: Alerts + Planner → Smart combination
+        # ================================================================
+        if len(agents_called_list) == 2:
+            has_alerts = any("alert" in a.lower() for a in agents_called_list)
+            has_planner = any("planner" in a.lower() for a in agents_called_list)
+            
+            if has_alerts and has_planner:
+                alerts_resp = ""
+                planner_resp = ""
+                
+                for idx, agent_id in enumerate(agents_called_list):
+                    if idx < len(responses):
+                        resp = responses[idx]
+                        if isinstance(resp, dict):
+                            resp = resp.get("response", "")
+                        
+                        if "alert" in agent_id.lower():
+                            alerts_resp = resp
+                        elif "planner" in agent_id.lower():
+                            planner_resp = resp
+                
+                # Check if no real issues
+                alerts_lower = alerts_resp.lower() if alerts_resp else ""
+                no_issues = any(p in alerts_lower for p in ["no current", "no major", "✅"]) or len(alerts_resp) < 100
+                
+                if no_issues:
+                    logger.info("✓ No issues - planner only")
+                    return {**state, "final_response": planner_resp, "should_end": True}
+                else:
+                    # Has issues - simple combination (NO LLM!)
+                    combined = f"{alerts_resp}\n\n{planner_resp}"
+                    logger.info("✓ Combined alerts + planner (no LLM)")
+                    return {**state, "final_response": combined, "should_end": True}
+        
+        # ================================================================
+        # RULE 3: Full chain → Preserve details
+        # ================================================================
         routing = state.get("routing_decision", "")
         
-        # ================================================================
-        # FIX: For simple routing queries, return planner response directly
-        # Don't over-synthesize and lose route details
-        # ================================================================
-        
-        # If ONLY planner was called (simple routing query)
-        if len(agents_called_list) == 1 and "planner" in agents_called_list[0]:
-            logger.info("?? Simple routing - returning planner response directly")
-            return {**state, "final_response": responses[0], "should_end": True}
-        
-        # If ONLY alerts was called (simple alert query)
-        if len(agents_called_list) == 1 and "alert" in agents_called_list[0]:
-            logger.info("?? Simple alerts - returning alerts response directly")
-            return {**state, "final_response": responses[0], "should_end": True}
-        
-        # If alerts + planner (both called)
-        if len(agents_called_list) == 2 and any("alert" in a for a in agents_called_list) and any("planner" in a for a in agents_called_list):
-            # Find each response
-            alerts = ""
-            planner = ""
+        if routing == "FULL_CHAIN":
+            planner_resp = ""
             
             for idx, agent_id in enumerate(agents_called_list):
                 if idx < len(responses):
                     resp = responses[idx]
-                    resp_text = resp.get("response", "") if isinstance(resp, dict) else resp
+                    if isinstance(resp, dict):
+                        resp = resp.get("response", "")
                     
-                    if "alert" in agent_id.lower():
-                        alerts = resp_text
-                    elif "planner" in agent_id.lower():
-                        planner = resp_text
+                    if "planner" in agent_id.lower():
+                        planner_resp = resp
+                        break
             
-            # Check if alerts said "no disruptions" or similar
-            alerts_lower = alerts.lower()
-            has_real_disruptions = any(word in alerts_lower for word in ["delay", "disruption", "problem", "issue", "scheduled"])
+            # Check if multiple routes requested
+            user_msg = state.get("user_message", "").lower()
+            wants_multiple = "two route" in user_msg or "give me multiple" in user_msg
             
-            if not has_real_disruptions or "no" in alerts_lower[:100]:
-                # No real disruptions - just return planner response
-                logger.info("? No major disruptions - returning planner route directly")
-                return {**state, "final_response": planner, "should_end": True}
+            if wants_multiple:
+                logger.info("📊 Multiple routes - direct return")
+                return {**state, "final_response": planner_resp, "should_end": True}
             
-            # Has disruptions - combine both responses simply
-            combined = f"{alerts}\n\n{planner}"
-            logger.info("? Combined alerts + planner responses")
-            return {**state, "final_response": combined, "should_end": True}
+            # Single route - add minimal landmark note
+            origin = state.get("origin_text", "")
+            dest = state.get("destination_text", "")
+            resolved_dest = state.get("resolved_destination", "")
+            
+            if resolved_dest and resolved_dest != dest:
+                final = f"{dest.title()} is at {resolved_dest}.\n\n{planner_resp}"
+            else:
+                final = planner_resp
+            
+            logger.info("✓ Minimal combination")
+            return {**state, "final_response": final, "should_end": True}
         
-        # FULL_CHAIN (stopfinder + alerts + planner) - needs synthesis
-        if routing == "FULL_CHAIN" and len(responses) >= 2:
-            alerts = ""
-            planner = ""
-            
-            for idx, agent_id in enumerate(agents_called_list):
-                if idx < len(responses):
-                    resp = responses[idx]
-                    resp_text = resp.get("response", "") if isinstance(resp, dict) else resp
-                    
-                    if "alert" in agent_id.lower():
-                        alerts = resp_text
-                    elif "planner" in agent_id.lower():
-                        planner = resp_text
-            
-            # For full chain, do minimal synthesis
-            prompt = f"""Combine alerts and route info concisely (2-3 sentences):
-
-Alerts: {alerts[:200]}
-Route: {planner[:400]}
-
-Just state: any key alerts briefly, then the actual route instructions.
-Don't lose the route details."""
-            
-            try:
-                async with httpx.AsyncClient() as client:
-                    r = await client.post(
-                        "https://api.openai.com/v1/chat/completions",
-                        headers={
-                            "Authorization": f"Bearer {OPENAI_API_KEY}",
-                            "Content-Type": "application/json"
-                        },
-                        json={
-                            "model": "gpt-4o-mini",
-                            "messages": [{"role": "user", "content": prompt}],
-                            "temperature": 0.2,
-                            "max_tokens": 300
-                        },
-                        timeout=15
-                    )
-                    r.raise_for_status()
-                
-                final = r.json()["choices"][0]["message"]["content"].strip()
-                logger.info("? Synthesized")
-                return {**state, "final_response": final, "should_end": True}
-                
-            except Exception as e:
-                logger.error(f"Synthesis error: {e}")
-                # Fallback: just combine responses
-                return {**state, "final_response": "\n\n".join(responses), "should_end": True}
-        
-        else:
-            # Default: return agent outputs directly
-            return {**state, "final_response": "\n\n".join(responses), "should_end": True}
+        # ================================================================
+        # FALLBACK
+        # ================================================================
+        logger.info("✓ Direct return")
+        return {**state, "final_response": "\n\n".join(responses), "should_end": True}
 
 
 # ============================================================================
@@ -940,12 +938,12 @@ class StateGraphOrchestrator:
         global _current_orchestrator
         
         logger.info("=" * 80)
-        logger.info("?? StateGraph Orchestrator v4.4 - Domain Expert Coordination")
-        logger.info("   ? Smart StopFinder skipping")
-        logger.info("   ? Domain analysis extraction")
-        logger.info("   ? Context passing between agents")
-        logger.info("   ? Registry discovery")
-        logger.info("   ? SLIM transport")
+        logger.info("🚀 StateGraph Orchestrator v4.4 - Domain Expert Coordination")
+        logger.info("   ✅ Smart StopFinder skipping")
+        logger.info("   ✅ Domain analysis extraction")
+        logger.info("   ✅ Context passing between agents")
+        logger.info("   ✅ Registry discovery")
+        logger.info("   ✅ SLIM transport")
         logger.info("=" * 80)
         
         self.graph = build_graph()
@@ -955,32 +953,32 @@ class StateGraphOrchestrator:
         if self.use_slim and SLIM_AVAILABLE:
             try:
                 self.slim_client = SlimAgentClient()
-                logger.info("? SLIM enabled")
+                logger.info("✅ SLIM enabled")
             except Exception as e:
                 logger.warning(f"SLIM failed: {e}")
                 self.use_slim = False
         
         _current_orchestrator = self
-        logger.info("? Orchestrator v4.4 ready")
+        logger.info("✅ Orchestrator v4.4 ready")
     
     async def startup_validation(self):
         """Validate registry connection"""
-        logger.info("?? Validating...")
+        logger.info("🔍 Validating...")
         
         if not await validate_registry():
             raise RuntimeError("Registry not accessible")
         
         agents = await get_agent_catalog()
-        logger.info(f"?? {len(agents)} agents")
+        logger.info(f"📚 {len(agents)} agents")
         
         if self.use_slim and self.slim_client:
             try:
                 await self.slim_client.initialize()
-                logger.info("? SLIM ready")
+                logger.info("✅ SLIM ready")
             except:
                 self.use_slim = False
         
-        logger.info("? Startup complete")
+        logger.info("✅ Startup complete")
     
     async def process_message(self, user_message: str, conversation_id: str) -> Dict[str, Any]:
         """Process message through domain expertise coordination"""
@@ -1040,4 +1038,3 @@ class StateGraphOrchestrator:
                     "registry_url": REGISTRY_URL
                 }
             }
-
