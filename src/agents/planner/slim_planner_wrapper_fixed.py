@@ -1,4 +1,4 @@
-"""
+﻿"""
 MBTA Route Planner Agent - v5.0 with Domain Context Awareness
 Receives alerts domain analysis and plans routes accordingly
 Version: 5.0 - Context-Aware Domain Expert
@@ -57,7 +57,7 @@ class PlannerExecutor(AgentExecutor):
     def __init__(self, openai_api_key: str, mbta_api_key: str):
         self.openai_client = OpenAI(api_key=openai_api_key) if openai_api_key else None
         self.mbta_api_key = mbta_api_key
-        logger.info("✅ PlannerExecutor v5.0 initialized with context awareness")
+        logger.info("? PlannerExecutor v5.0 initialized with context awareness")
     
     def extract_alerts_context(self, message: str) -> Dict[str, Any]:
         """
@@ -88,7 +88,7 @@ class PlannerExecutor(AgentExecutor):
             return context
         
         context["has_context"] = True
-        logger.info("🧠 Detected alerts context in message")
+        logger.info("?? Detected alerts context in message")
         
         # Extract recommendation
         rec_match = re.search(r"recommendation:\s*(\w+)", message, re.IGNORECASE)
@@ -109,7 +109,7 @@ class PlannerExecutor(AgentExecutor):
                 if route in avoid_text:
                     context["avoid_routes"].append(route.split()[0])  # Extract "Red", "Orange", etc.
         
-        logger.info(f"✓ Extracted context:")
+        logger.info(f"? Extracted context:")
         logger.info(f"  Recommendation: {context['recommendation']}")
         logger.info(f"  Severity: {context['severity']}")
         logger.info(f"  Avoid: {context['avoid_routes']}")
@@ -129,7 +129,7 @@ class PlannerExecutor(AgentExecutor):
         
         detected = any(kw in query_lower for kw in keywords)
         if detected:
-            logger.info(f"✓ Multiple routes requested")
+            logger.info(f"? Multiple routes requested")
         return detected
     
     async def generate_multiple_routes_with_llm(
@@ -158,9 +158,9 @@ class PlannerExecutor(AgentExecutor):
 {avoid_instruction}
 
 MBTA System:
-- Red Line: Alewife ↔ Ashmont/Braintree (via Park Street, South Station)
-- Orange Line: Oak Grove ↔ Forest Hills (via North Station, Downtown Crossing, Back Bay)
-- Blue Line: Wonderland ↔ Bowdoin (via Airport, Aquarium, Government Center)
+- Red Line: Alewife ? Ashmont/Braintree (via Park Street, South Station)
+- Orange Line: Oak Grove ? Forest Hills (via North Station, Downtown Crossing, Back Bay)
+- Blue Line: Wonderland ? Bowdoin (via Airport, Aquarium, Government Center)
 - Green Line: B,C,D,E branches (all through Park Street, Kenmore)
 
 Transfer Stations:
@@ -198,7 +198,7 @@ Format:
 
 Be realistic."""
             
-            logger.info(f"🤖 Generating {num_options} routes (avoid: {avoid_routes or 'none'})")
+            logger.info(f"?? Generating {num_options} routes (avoid: {avoid_routes or 'none'})")
             
             response = self.openai_client.chat.completions.create(
                 model="gpt-4o-mini",
@@ -211,9 +211,9 @@ Be realistic."""
             
             # Add context note if routes were avoided
             if avoid_routes:
-                routes_text += f"\n\n💡 Note: Alternative routes provided to avoid disruptions on {', '.join(avoid_routes)}."
+                routes_text += f"\n\n?? Note: Alternative routes provided to avoid disruptions on {', '.join(avoid_routes)}."
             
-            logger.info(f"✅ Generated routes")
+            logger.info(f"? Generated routes")
             return routes_text
             
         except Exception as e:
@@ -285,8 +285,8 @@ Return ONLY: origin|destination
 If only destination: none|destination
 
 Examples:
-- "from park street to harvard" → park street|harvard
-- "to harvard" → none|harvard
+- "from park street to harvard" ? park street|harvard
+- "to harvard" ? none|harvard
 
 Response:"""
 
@@ -305,7 +305,7 @@ Response:"""
                 origin = parts[0].strip() if parts[0].strip().lower() != "none" else None
                 destination = parts[1].strip() if len(parts) > 1 and parts[1].strip().lower() != "none" else None
                 
-                logger.info(f"✓ LLM: origin='{origin}', dest='{destination}'")
+                logger.info(f"? LLM: origin='{origin}', dest='{destination}'")
                 return origin, destination
             
             return await self.extract_locations_basic(query)
@@ -339,7 +339,7 @@ Response:"""
         if destination:
             destination = destination.strip("?.,!").strip()
         
-        logger.info(f"✓ Basic: origin='{origin}', dest='{destination}'")
+        logger.info(f"? Basic: origin='{origin}', dest='{destination}'")
         return origin, destination
     
     async def find_stop_by_name(self, name: str) -> Optional[Dict[str, Any]]:
@@ -437,9 +437,9 @@ Response:"""
         NEW in v5.0: Uses alerts analysis to make better routing decisions.
         """
         try:
-            logger.info(f"Planning: '{origin}' → '{destination}'")
+            logger.info(f"Planning: '{origin}' ? '{destination}'")
             if alerts_context.get("has_context"):
-                logger.info(f"🧠 With context: recommendation={alerts_context['recommendation']}, avoid={alerts_context['avoid_routes']}")
+                logger.info(f"?? With context: recommendation={alerts_context['recommendation']}, avoid={alerts_context['avoid_routes']}")
             
             # Find stops
             origin_stop = await self.find_stop_by_name(origin)
@@ -450,7 +450,7 @@ Response:"""
             if not dest_stop:
                 return {"ok": False, "text": f"Couldn't find '{destination}'."}
             
-            logger.info(f"Stops: {origin_stop['name']} → {dest_stop['name']}")
+            logger.info(f"Stops: {origin_stop['name']} ? {dest_stop['name']}")
             
             # Get avoid routes from context
             avoid_routes = alerts_context.get("avoid_routes", []) if alerts_context.get("has_context") else []
@@ -458,11 +458,11 @@ Response:"""
             # ================================================================
             # ALWAYS CHECK API FIRST (Critical Fix!)
             # ================================================================
-            logger.info(f"🔍 Checking MBTA API for direct routes...")
+            logger.info(f"?? Checking MBTA API for direct routes...")
             api_routes = await self.get_routes_between_stops(origin_stop["id"], dest_stop["id"])
             
             if api_routes:
-                logger.info(f"✓ Found {len(api_routes)} direct routes via API")
+                logger.info(f"? Found {len(api_routes)} direct routes via API")
                 
                 # Check if direct route should be avoided
                 direct_route_id = api_routes[0]["id"]
@@ -473,7 +473,7 @@ Response:"""
                 should_avoid_direct = avoid_routes and route_name in avoid_routes
                 
                 if should_avoid_direct:
-                    logger.info(f"⚠️ Direct route {route_name} should be avoided - generating alternatives")
+                    logger.info(f"?? Direct route {route_name} should be avoided - generating alternatives")
                     
                     # Generate alternative routes via LLM
                     routes_text = await self.generate_multiple_routes_with_llm(
@@ -491,7 +491,7 @@ Response:"""
                 
                 else:
                     # Direct route is fine - USE IT (don't hallucinate)
-                    logger.info(f"✓ Using direct route: {api_routes[0]['long_name']}")
+                    logger.info(f"? Using direct route: {api_routes[0]['long_name']}")
                     
                     route = api_routes[0]
                     
@@ -517,7 +517,7 @@ Response:"""
             
             else:
                 # No direct route found via API - use LLM for transfer suggestions
-                logger.info(f"❌ No direct routes via API - using LLM for transfers")
+                logger.info(f"? No direct routes via API - using LLM for transfers")
                 
                 routes_text = await self.generate_multiple_routes_with_llm(
                     origin_stop['name'],
@@ -542,25 +542,25 @@ Response:"""
         if not context.get("has_context"):
             return ""
         
-        explanation = "🧠 **Route Planning Considering Current Conditions:**\n"
+        explanation = "?? **Route Planning Considering Current Conditions:**\n"
         
         recommendation = context.get("recommendation", "unknown")
         severity = context.get("severity", "unknown")
         avoid = context.get("avoid_routes", [])
         
         if recommendation == "take_alternative":
-            explanation += f"⚠️ Major disruptions detected ({severity} severity)"
+            explanation += f"?? Major disruptions detected ({severity} severity)"
             if avoid:
                 explanation += f" on {', '.join(avoid)}"
             explanation += ".\n"
             explanation += "Providing alternative routes to avoid delays.\n"
         
         elif recommendation == "monitor":
-            explanation += f"ℹ️ Some disruptions detected ({severity} severity).\n"
+            explanation += f"?? Some disruptions detected ({severity} severity).\n"
             explanation += "Routes optimized considering current conditions.\n"
         
         elif recommendation == "wait":
-            explanation += "✅ Delays are resolving. Standard routes should be available.\n"
+            explanation += "? Delays are resolving. Standard routes should be available.\n"
         
         return explanation
     
@@ -581,7 +581,7 @@ Response:"""
                     message_text = part.text
                     break
             
-            logger.info(f"📨 Planner: '{message_text[:150]}'")
+            logger.info(f"?? Planner: '{message_text[:150]}'")
             
             # NEW: Extract alerts context from message
             alerts_context = self.extract_alerts_context(message_text)
@@ -593,7 +593,7 @@ Response:"""
             clean_message = message_text.split("ALERTS")[0].strip()  # Remove context section
             origin, destination = await self.extract_locations_with_llm(clean_message)
             
-            logger.info(f"Locations: '{origin}' → '{destination}'")
+            logger.info(f"Locations: '{origin}' ? '{destination}'")
             
             # Validation
             if not destination:
@@ -627,7 +627,7 @@ Response:"""
             response_text = result.get("text", "Could not plan route")
             
             if result.get("ok"):
-                response_text += "\n\n✅ Route planning complete"
+                response_text += "\n\n? Route planning complete"
             
             # Send response
             response_message = Message(
@@ -637,7 +637,7 @@ Response:"""
             )
             
             await event_queue.enqueue_event(response_message)
-            logger.info("✅ Response sent")
+            logger.info("? Response sent")
             
         except Exception as e:
             logger.error(f"Error: {e}", exc_info=True)
@@ -698,12 +698,12 @@ def main():
     app = server.build()
     
     logger.info("=" * 80)
-    logger.info("🚀 MBTA Planner Agent v5.0 - Context-Aware Domain Expert")
+    logger.info("?? MBTA Planner Agent v5.0 - Context-Aware Domain Expert")
     logger.info("=" * 80)
-    logger.info("✅ Extracts alerts context from messages")
-    logger.info("✅ Avoids disrupted routes automatically")
-    logger.info("✅ Provides alternative routes when needed")
-    logger.info("✅ Explains routing decisions based on context")
+    logger.info("? Extracts alerts context from messages")
+    logger.info("? Avoids disrupted routes automatically")
+    logger.info("? Provides alternative routes when needed")
+    logger.info("? Explains routing decisions based on context")
     logger.info("=" * 80)
     
     uvicorn.run(app, host="0.0.0.0", port=50052, log_level="info")
@@ -711,3 +711,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

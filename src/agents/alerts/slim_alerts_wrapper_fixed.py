@@ -1,4 +1,4 @@
-"""
+﻿"""
 MBTA Alerts Agent v6.0 - FINAL COMPLETE VERSION
 - Answers historical pattern questions without needing current alerts
 - Filters out accessibility alerts (elevators/escalators)
@@ -127,7 +127,7 @@ class AlertsExecutor(AgentExecutor):
     def __init__(self, mbta_api_key: str, openai_api_key: str):
         self.mbta_api_key = mbta_api_key
         self.openai_client = OpenAI(api_key=openai_api_key) if openai_api_key else None
-        logger.info("✅ Alerts Agent v6.0 - FINAL Complete Version")
+        logger.info("? Alerts Agent v6.0 - FINAL Complete Version")
     
     def is_historical_question(self, query: str) -> bool:
         """Detect if asking about historical patterns (not current status)"""
@@ -175,7 +175,7 @@ class AlertsExecutor(AgentExecutor):
             response += f"• Average: {pattern['avg']} minutes\n\n"
             response += f"This data shows {pattern['description']} usually resolve within this timeframe, though individual incidents can vary."
             
-            logger.info(f"✅ Answered historical question from data: {cause}")
+            logger.info(f"? Answered historical question from data: {cause}")
             return response
         
         # General question - show all patterns
@@ -264,7 +264,7 @@ class AlertsExecutor(AgentExecutor):
         work_type = self.identify_planned_work_type(alert)
         pattern = self.PLANNED_WORK_PATTERNS.get(work_type, self.PLANNED_WORK_PATTERNS["general_maintenance"])
         
-        response = f"📋 Scheduled: {header}\n\n"
+        response = f"?? Scheduled: {header}\n\n"
         response += f"   Impact: Expect {pattern['delay_impact_min']}-{pattern['delay_impact_max']} minutes additional travel time\n"
         response += f"   Type: {pattern['description']}\n"
         response += f"   Note: {pattern['note']}\n"
@@ -285,8 +285,8 @@ class AlertsExecutor(AgentExecutor):
         pattern = self.HISTORICAL_PATTERNS.get(cause, self.HISTORICAL_PATTERNS["UNKNOWN_CAUSE"])
         
         # Build response
-        response = f"⚠️ {header}\n\n"
-        response += f"📊 Historical Context (from {pattern['sample_size']:,} past incidents, 2020-2023):\n"
+        response = f"?? {header}\n\n"
+        response += f"?? Historical Context (from {pattern['sample_size']:,} past incidents, 2020-2023):\n"
         response += f"   Typical duration: {pattern['median']} min median (range: {pattern['min']}-{pattern['max']} min)\n\n"
         
         if elapsed:
@@ -362,13 +362,13 @@ class AlertsExecutor(AgentExecutor):
                     message_text = part.text
                     break
             
-            logger.info(f"📨 Query: '{message_text[:80]}'")
+            logger.info(f"?? Query: '{message_text[:80]}'")
             
             # ================================================================
             # Mode 1: Pure historical pattern question
             # ================================================================
             if self.is_historical_question(message_text):
-                logger.info("📚 Historical question - answering from data")
+                logger.info("?? Historical question - answering from data")
                 response_text = self.answer_historical_question(message_text)
                 
                 response_message = Message(
@@ -386,7 +386,7 @@ class AlertsExecutor(AgentExecutor):
             alerts = await self.get_alerts(route)
             
             if not alerts:
-                response_text = f"✅ No current transit delays on {route + ' Line' if route else 'the subway'}."
+                response_text = f"? No current transit delays on {route + ' Line' if route else 'the subway'}."
                 
                 response_message = Message(
                     message_id=str(uuid4()),
@@ -405,7 +405,7 @@ class AlertsExecutor(AgentExecutor):
                 "should i", "recommend", "better to"
             ])
             
-            logger.info(f"🧠 Analyzing {len(alerts)} alerts (wants_prediction={wants_prediction})")
+            logger.info(f"?? Analyzing {len(alerts)} alerts (wants_prediction={wants_prediction})")
             
             # Separate planned work from active incidents
             planned_alerts = []
@@ -420,7 +420,7 @@ class AlertsExecutor(AgentExecutor):
                         # Just status check - simple format
                         attrs = alert.get("attributes", {})
                         header = attrs.get("header") or ""
-                        planned_alerts.append(f"📋 Scheduled: {header}")
+                        planned_alerts.append(f"?? Scheduled: {header}")
                 else:
                     # Active incident!
                     active_alerts.append(alert)
@@ -438,7 +438,7 @@ class AlertsExecutor(AgentExecutor):
             if active_alerts and wants_prediction:
                 # User asked for prediction AND there's an active incident
                 # Show historical analysis!
-                logger.info("🎯 Active incident + prediction query → Adding historical context")
+                logger.info("?? Active incident + prediction query ? Adding historical context")
                 
                 for alert in active_alerts[:2]:
                     analysis = self.analyze_active_incident(alert)
@@ -449,7 +449,7 @@ class AlertsExecutor(AgentExecutor):
                 for alert in active_alerts[:2]:
                     attrs = alert.get("attributes", {})
                     header = attrs.get("header") or ""
-                    response_parts.append(f"⚠️ Active: {header}")
+                    response_parts.append(f"?? Active: {header}")
             
             # Combine parts
             if response_parts:
@@ -465,7 +465,7 @@ class AlertsExecutor(AgentExecutor):
             )
             
             await event_queue.enqueue_event(response_message)
-            logger.info("✅ Response sent")
+            logger.info("? Response sent")
             
         except Exception as e:
             logger.error(f"Error: {e}", exc_info=True)
@@ -519,11 +519,11 @@ def main():
     app = server.build()
     
     logger.info("=" * 80)
-    logger.info("🚀 MBTA Alerts Agent v6.0 - FINAL")
-    logger.info("   ✅ Answers historical pattern questions")
-    logger.info("   ✅ Analyzes current incidents with context")
-    logger.info("   ✅ Filters accessibility alerts")
-    logger.info("   ✅ Real MBTA data (41,970 incidents)")
+    logger.info("?? MBTA Alerts Agent v6.0 - FINAL")
+    logger.info("   ? Answers historical pattern questions")
+    logger.info("   ? Analyzes current incidents with context")
+    logger.info("   ? Filters accessibility alerts")
+    logger.info("   ? Real MBTA data (41,970 incidents)")
     logger.info("=" * 80)
     
     uvicorn.run(app, host="0.0.0.0", port=50051, log_level="info")
@@ -531,3 +531,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+

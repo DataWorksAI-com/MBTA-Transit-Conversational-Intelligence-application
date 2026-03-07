@@ -563,13 +563,13 @@ async def get_ui():
             <div class="chat-header">
                 <div class="header-left">
                     <div class="status-indicator"></div>
-                    MBTA Agntcy
+                    MBTA Winter 2026 🎄
                 </div>
             </div>
             
             <div class="chat-messages" id="messages">
                 <div style="text-align: center; color: #6b7280; padding: 40px;">
-                    <h2 style="margin-bottom: 10px; color: #1f2937;">👋 Welcome to MBTA Agntcy!</h2>
+                    <h2 style="margin-bottom: 10px; color: #1f2937;">👋 Welcome to MBTA Winter 2026!</h2>
                     <p>Ask me anything about Boston's transit system</p>
                     <p style="font-size: 13px; margin-top: 20px; opacity: 0.7;">
                         Watch the system panel on the right to see how your queries are processed! →
@@ -604,10 +604,6 @@ async def get_ui():
                     <label class="routing-option">
                         <input type="radio" name="routingMode" value="auto" checked />
                         Auto
-                    </label>
-                    <label class="routing-option">
-                        <input type="radio" name="routingMode" value="shortcut" />
-                        Shortcut
                     </label>
                     <label class="routing-option">
                         <input type="radio" name="routingMode" value="mcp" />
@@ -811,7 +807,7 @@ async def get_ui():
                         <strong>Intent:</strong> ${details.intent || 'unknown'}
                     </div>
                     <div class="system-detail">
-                        <strong>Path:</strong> ${details.path === 'shortcut' ? 'Regex Shortcut' : details.path === 'mcp' ? 'MCP Fast Path' : 'A2A Agents'}
+                        <strong>Path:</strong> ${details.path === 'mcp' ? 'MCP Fast Path' : 'A2A Agents'}
                     </div>
                     ${details.routing_mode && details.routing_mode !== 'auto' ? `<div class="system-detail"><strong>Forced Mode:</strong> ${details.routing_mode.toUpperCase()}</div>` : ''}
                     ${details.confidence ? `<div class="system-detail"><strong>Confidence:</strong> ${(details.confidence * 100).toFixed(0)}%</div>` : ''}
@@ -946,9 +942,14 @@ async def websocket_endpoint(websocket: WebSocket):
                             }, websocket)
                     
                     # Send response back to client
+                    response_text = result.get('response')
+                    if not isinstance(response_text, str) or not response_text.strip():
+                        logger.error(f"Exchange response missing 'response'. Keys: {list(result.keys())}")
+                        response_text = "I couldn't generate a response for that query. Please try again."
+
                     await manager.send_message({
                         'type': 'response',
-                        'content': result['response'],
+                        'content': response_text,
                         'conversation_id': conversation_id,
                         'metadata': result.get('metadata', {})
                     }, websocket)

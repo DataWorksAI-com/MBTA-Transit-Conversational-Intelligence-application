@@ -137,6 +137,101 @@ def parse_route_from_query(query: str) -> Optional[str]:
     return None
 
 
+def is_crowding_query(query: str) -> bool:
+    q = query.lower()
+    crowding_terms = [
+        "crowded", "crowding", "occupancy", "packed", "busy", "full", "capacity"
+    ]
+    return any(t in q for t in crowding_terms)
+
+
+def _occupancy_bucket(status: str) -> int:
+    # Lower is better (more seats), higher is worse (more crowded)
+    order = {
+        "MANY_SEATS_AVAILABLE": 1,
+        "FEW_SEATS_AVAILABLE": 2,
+        "STANDING_ROOM_ONLY": 3,
+        "CRUSHED_STANDING_ROOM_ONLY": 4,
+        "FULL": 5,
+        "NO_DATA_AVAILABLE": 0,
+        "NOT_ACCEPTING_PASSENGERS": 0,
+    }
+    return order.get((status or "").upper(), 0)
+
+
+def get_crowding(route: Optional[str] = None) -> Dict[str, Any]:
+    """
+    Get live crowding from MBTA vehicles occupancy_status.
+    """
+    try:
+        params = {"api_key": MBTA_API_KEY}
+        if route:
+            params["filter[route]"] = route
+
+        response = requests.get(f"{MBTA_BASE_URL}/vehicles", params=params, timeout=10)
+        response.raise_for_status()
+        vehicles = response.json().get("data", [])
+
+        statuses = []
+        for v in vehicles:
+            attrs = v.get("attributes", {})
+            s = attrs.get("occupancy_status")
+            if s:
+                statuses.append(s)
+
+        if not statuses:
+            route_text = f"{route} Line" if route else "MBTA"
+            return {
+                "ok": True,
+                "text": f"I couldn't find enough live occupancy data for {route_text} right now. Please try again shortly.",
+                "summary": "No occupancy data",
+                "count": 0,
+            }
+
+        avg = sum(_occupancy_bucket(s) for s in statuses) / len(statuses)
+        if avg <= 1.7:
+            level = "LOW"
+            guidance = "Trains are lightly occupied. Seats are usually available."
+        elif avg <= 2.6:
+            level = "MODERATE"
+            guidance = "Trains are moderately busy. You'll likely find a seat."
+        elif avg <= 3.6:
+            level = "HIGH"
+            guidance = "Trains are crowded. Expect standing room on many trips."
+        else:
+            level = "VERY HIGH"
+            guidance = "Trains are very crowded right now. Expect limited space."
+
+        route_text = f"{route} Line" if route else "MBTA"
+        text = (
+            f"🟡 **{route_text} Crowding: {level}**\n\n"
+            f"📊 Overall: crowding estimate from {len(statuses)} active trains\n\n"
+            f"{guidance}\n\n"
+            f"ℹ️ *Data from MBTA real-time vehicle occupancy sensors (updated every 10-30 seconds)*"
+        )
+
+        return {
+            "ok": True,
+            "text": text,
+            "summary": f"{route_text} crowding: {level}",
+            "count": len(statuses),
+        }
+    except requests.exceptions.RequestException as e:
+        log.error(f"MBTA vehicles API request failed: {e}")
+        return {
+            "ok": False,
+            "error": f"Failed to fetch crowding from MBTA API: {str(e)}",
+            "text": "Sorry, I couldn't retrieve live crowding right now. Please try again.",
+        }
+    except Exception as e:
+        log.error(f"Unexpected crowding error: {e}")
+        return {
+            "ok": False,
+            "error": str(e),
+            "text": "An unexpected error occurred while checking crowding.",
+        }
+
+
 def get_alerts(route: Optional[str] = None, activity: Optional[str] = None) -> Dict[str, Any]:
     """
     Fetch real-time alerts from MBTA API.
@@ -326,6 +421,21 @@ async def a2a_message(message: A2AMessage):
             route = parse_route_from_query(query)
             
             log.info(f"Processing query: '{query}' (detected route: {route})")
+
+            # Handle live crowding/occupancy queries
+            if is_crowding_query(query):
+                result = get_crowding(route=route)
+                return {
+                    "type": "response",
+                    "payload": result,
+                    "metadata": {
+                        "status": "success",
+                        "agent": "mbta-alerts-agent",
+                        "route_detected": route,
+                        "mode": "crowding",
+                        "timestamp": datetime.now().isoformat()
+                    }
+                }
             
             # Get alerts from MBTA API
             result = get_alerts(route=route)
