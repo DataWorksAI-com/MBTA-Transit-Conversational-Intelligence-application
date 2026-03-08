@@ -65,49 +65,6 @@ The project supports two deployment modes:
 - [Docker](https://docs.docker.com/get-docker/)
 
 ---
-
-## What Changed From the Original (Anthropic Claude Integration)
-
-The original project used OpenAI GPT-4o-mini exclusively. The following changes were made to integrate Anthropic Claude as the primary LLM provider, with OpenAI kept as an optional fallback.
-
-### New File
-
-**`src/exchange_agent/llm_client.py`** — A provider-agnostic LLM wrapper. Auto-detects which provider to use based on which API keys are present. Supports both Anthropic and OpenAI through a single `.complete()` interface so the rest of the codebase doesn't need to know which provider is active.
-
-### Modified Files
-
-| File | Change |
-|------|--------|
-| `src/exchange_agent/exchange_server.py` | Removed hardcoded `openai_client` calls; replaced with `llm.complete()` from `llm_client.py`. Fixed import path. |
-| `src/exchange_agent/stategraph_orchestrator.py` | Same OpenAI → `llm.complete()` replacement. Also removed the `alive=False` filter that was silently blocking agent discovery — agents were registering but never being found. |
-| `src/agents/planner/main.py` | Replaced OpenAI client with `llm_client`. Added `find_transfer_routes()`: tries direct routes first, then searches for a one-transfer connection by finding a stop where the two route networks intersect (e.g. MIT → Northeastern: Red Line to Park Street, transfer to Green Line). |
-| `k8s/secrets.yaml` | Added `ANTHROPIC_API_KEY` field. |
-| `k8s/configmap.yaml` | Added `LLM_PROVIDER`, `ANTHROPIC_MODEL`, `OPENAI_MODEL` env vars. |
-| `k8s/register-agents-job.yaml` | Added a `PUT /status` call after each agent registration to explicitly mark agents `alive=true`. The NANDA registry defaults new registrations to `alive=false`, which caused agents to be invisible to the orchestrator. |
-| `requirements.txt` | Added `anthropic>=0.25.0`. |
-
-### LLM Provider Configuration
-
-The system uses a provider-agnostic client (`src/exchange_agent/llm_client.py`). Configure via environment variables in `k8s/configmap.yaml` and `k8s/secrets.yaml`:
-
-| Env Var | Description |
-|---------|-------------|
-| `ANTHROPIC_API_KEY` | Anthropic API key — set this to use Claude (recommended) |
-| `LLM_PROVIDER` | Optional override: `anthropic` or `openai`. Auto-detects from available keys if not set. |
-| `ANTHROPIC_MODEL` | Model to use. Default: `claude-sonnet-4-20250514` |
-| `OPENAI_API_KEY` | Optional fallback if no Anthropic key is present |
-| `OPENAI_MODEL` | Model to use if OpenAI is selected. Default: `gpt-4o-mini` |
-
-### Known Race Condition on First Deploy
-
-The exchange agent validates registry connectivity at startup. If the registry pod isn't ready yet when exchange starts, the A2A path gets permanently disabled for that pod's lifetime. **Fix:** restart exchange after everything is running:
-
-```bash
-kubectl -n mbta rollout restart deployment/exchange
-```
-
----
-
 ## Cloud Deployment (LKE)
 
 ### 1. Clone this repository
@@ -426,7 +383,38 @@ curl.exe -s -X POST $REGISTRY_URL `
   -d '{"agent_id":"mbta-stopfinder","name":"MBTA StopFinder Agent","agent_url":"http://stopfinder-agent:8003","status":"alive"}'
 ```
 
-### 5. Stop services
+### 5. Add agent status
+
+macOS:
+```bash
+curl -s -X PUT http://registry:6900/agents/mbta-alerts/status \
+  -H "Content-Type: application/json" \
+  -d '{"alive": true, "capabilities": ["alerts", "service_status", "delays", "disruptions"], "description": "Monitors and reports MBTA service alerts, delays, and disruptions for all transit lines including Red, Orange, Blue, Green, Silver, Commuter Rail, Bus, and Ferry. Provides real-time alert information."}'
+
+curl -s -X PUT http://registry:6900/agents/mbta-planner/status \
+  -H "Content-Type: application/json" \
+  -d '{"alive": true, "capabilities": ["trip_planning", "route_finding", "transfers", "schedules"], "description": "Plans transit routes between locations in the Boston MBTA network. Can find optimal routes, transfers, and provide trip planning assistance using real-time schedule data."}'
+
+curl -s -X PUT http://registry:6900/agents/mbta-stopfinder/status \
+  -H "Content-Type: application/json" \
+  -d '{"alive": true, "capabilities": ["stop_search", "station_info", "accessibility", "nearby_stops"], "description": "Finds MBTA stops and stations by name, location, or route. Provides stop details including accessibility, available routes, and nearby connections."}'
+```
+Windows:
+```PowerShell
+curl.exe -s -X PUT $REGISTRY_URL `
+  -H "Content-Type: application/json" `
+  -d '{"alive": true, "capabilities": ["alerts", "service_status", "delays", "disruptions"], "description": "Monitors and reports MBTA service alerts, delays, and disruptions for all transit lines including Red, Orange, Blue, Green, Silver, Commuter Rail, Bus, and Ferry. Provides real-time alert information."}'
+
+curl.exe -s -X PUT $REGISTRY_URL `
+  -H "Content-Type: application/json" `
+  -d '{"alive": true, "capabilities": ["trip_planning", "route_finding", "transfers", "schedules"], "description": "Plans transit routes between locations in the Boston MBTA network. Can find optimal routes, transfers, and provide trip planning assistance using real-time schedule data."}'
+
+curl.exe -s -X PUT $REGISTRY_URL `
+  -H "Content-Type: application/json" `
+  -d '{"alive": true, "capabilities": ["stop_search", "station_info", "accessibility", "nearby_stops"], "description": "Finds MBTA stops and stations by name, location, or route. Provides stop details including accessibility, available routes, and nearby connections."}'
+```
+
+### 6. Stop services
 
 ```bash
 docker compose down          # Stop containers
@@ -462,7 +450,7 @@ MbtaWinter2026/
 │   └── ...
 ├── docker-compose.yaml
 ├── deploy.sh
-├── requirements.txt                    # Now includes anthropic>=0.25.0
+├── requirements.txt                    # Now includes anthropic>=0.84.0
 └── .env.example
 ```
 
@@ -475,7 +463,7 @@ MbtaWinter2026/
 | `ANTHROPIC_API_KEY` | Exchange, Planner | Anthropic API key (primary LLM) |
 | `OPENAI_API_KEY` | Exchange, Planner | OpenAI API key (optional fallback) |
 | `LLM_PROVIDER` | Exchange, Planner | Force `anthropic` or `openai`; auto-detected if unset |
-| `ANTHROPIC_MODEL` | Exchange, Planner | Claude model. Default: `claude-sonnet-4-20250514` |
+| `ANTHROPIC_MODEL` | Exchange, Planner | Claude model. Default: `claude-haiku-4-5-20251001` |
 | `OPENAI_MODEL` | Exchange, Planner | OpenAI model. Default: `gpt-4o-mini` |
 | `MBTA_API_KEY` | All agents | MBTA v3 API key |
 | `USE_SLIM` | Exchange | Enable SLIM transport (`true`/`false`) |
