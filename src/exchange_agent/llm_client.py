@@ -6,8 +6,9 @@ Override with LLM_PROVIDER env var: "anthropic" or "openai"
 import os
 import asyncio
 from typing import Optional
+from dotenv import load_dotenv
 
-from anthropic import Omit
+load_dotenv()
 
 class LLMClientException(RuntimeError):
     pass
@@ -33,11 +34,11 @@ class LLMClient:
 
     def _init_client(self):
         if self.provider == "anthropic":
-            import anthropic
-            return anthropic.Anthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
+            from anthropic import AsyncAnthropic
+            return AsyncAnthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
         else:
-            from openai import OpenAI
-            return OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+            from openai import AsyncOpenAI
+            return AsyncOpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
     async def complete(
         self, 
@@ -49,8 +50,8 @@ class LLMClient:
     ) -> str:
         """Single unified interface for both providers."""
         if self.provider == "anthropic":
-            response = await asyncio.to_thread(
-                self.client.messages.create,
+            from anthropic import Omit
+            response = await self.client.messages.create(
                 model=os.getenv("ANTHROPIC_MODEL", "claude-haiku-4-5-20251001"),
                 max_tokens=max_tokens,
                 system=system,
@@ -59,8 +60,7 @@ class LLMClient:
             )
             return response.content[0].text.strip()
         else:
-            response = await asyncio.to_thread(
-                self.client.chat.completions.create,
+            response = await self.client.chat.completions.create(
                 model=os.getenv("OPENAI_MODEL", "gpt-4o-mini"),
                 messages=[
                     {"role": "system", "content": system},

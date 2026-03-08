@@ -131,6 +131,7 @@ services:
       - PYTHONPATH=/app
       - MBTA_API_KEY=${MBTA_API_KEY}
       - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
       - PORT=8002
       - OTEL_EXPORTER_OTLP_ENDPOINT=http://otel-collector:4317
       - WATCHFILES_FORCE_POLLING=true
