@@ -3,6 +3,7 @@ Provider-agnostic LLM client.
 Supports Anthropic and OpenAI — auto-detects based on available API keys.
 Override with LLM_PROVIDER env var: "anthropic" or "openai"
 """
+from logging import log
 import os
 import asyncio
 from typing import Optional
@@ -59,7 +60,11 @@ class LLMClient:
                 messages=[{"role": "user", "content": user}],
                 output_config={"format": {"type": "json_schema", "schema": response_schema}} if response_schema else Omit()
             )
-            return response.content[0].text.strip()
+            if len(response.content)>0:
+                return response.content[0].text.strip()
+            else:
+                log.warning(f"Response has no content")
+                return "no content :("
         else:
             response = await self.client.chat.completions.create(
                 model=os.getenv("OPENAI_MODEL", "gpt-4o-mini"),
@@ -71,7 +76,11 @@ class LLMClient:
                 max_tokens=max_tokens,
                 response_format={"type": "json_object"} if response_schema else None,
             )
-            return response.choices[0].message.content.strip()
+            if len(response.choices)>0:
+                return response.choices[0].message.content.strip()
+            else:
+                log.warning(f"Response has no content")
+                return "no content :("
 
 
 # Singleton
