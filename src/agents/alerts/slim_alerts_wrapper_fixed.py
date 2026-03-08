@@ -34,7 +34,7 @@ logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
 # Configuration
-MBTA_API_KEY = os.getenv('MBTA_API_KEY', 'c845eff5ae504179bc9cfa69914059de')
+MBTA_API_KEY = os.getenv('MBTA_API_KEY', 'your api key')
 MBTA_BASE_URL = "https://api-v3.mbta.com"
 OPENAI_API_KEY = os.getenv('OPENAI_API_KEY')
 
