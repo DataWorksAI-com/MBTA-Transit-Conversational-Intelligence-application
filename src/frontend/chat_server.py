@@ -64,7 +64,7 @@ async def get_ui():
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MBTA Agentcy - Transit Intelligence</title>
+    <title>MBTA Agntcy - Transit Intelligence</title>
     <style>
         * {
             margin: 0;
@@ -510,7 +510,7 @@ async def get_ui():
         <div class="chat-panel">
             <div class="chat-header">
                 <div class="header-left">
-                    <span>🚇 MBTA Agentcy</span>
+                    <span>🚇 MBTA Agntcy</span>
                     <span class="weather-indicator" id="weatherIcon">☁️</span>
                 </div>
                 <div class="connection-status">
@@ -522,7 +522,7 @@ async def get_ui():
             <div class="messages-container" id="messagesContainer">
                 <div class="message system">
                     <div class="message-content">
-                        Welcome to MBTA Agentcy! Ask about transit alerts, routes, or stations.
+                        Welcome to MBTA Agntcy! Ask about transit alerts, routes, or stations.
                     </div>
                 </div>
             </div>
