@@ -16,7 +16,8 @@ from openai import OpenAI
 from opentelemetry.instrumentation.fastapi import FastAPIInstrumentor
 
 import sys
-import os
+from src.exchange_agent.llm_client import LLMClientException
+
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
 
 # Setup logging
@@ -50,8 +51,18 @@ openai_client = OpenAI(api_key=OPENAI_API_KEY) if OPENAI_API_KEY else None
 if not MBTA_API_KEY:
     log.warning("MBTA_API_KEY not found in environment variables!")
 
-if not OPENAI_API_KEY:
-    log.warning("OPENAI_API_KEY not found - LLM extraction disabled!")
+# LLM Client
+try:
+    from src.exchange_agent.llm_client import get_llm_client
+    llm = get_llm_client()
+    log.info(f"✓ LLM provider: {llm.provider}")
+except LLMClientException as e:
+    log.critical(f"Failed to set up LLM provider: {e}")
+    sys.exit(1)
+except RuntimeError as e:
+    llm = None
+    log.warning(f"LLM extraction disabled: {e}")
+    log.warning(f"Runtime error in LLM setup: {e}")
 
 # Pydantic models
 class A2AMessage(BaseModel):
