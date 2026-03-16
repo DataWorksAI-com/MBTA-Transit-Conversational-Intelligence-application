@@ -1,4 +1,4 @@
-﻿"""
+"""
 Exchange Agent - Version 5.1 with Manual Protocol Override
 Added: force_protocol parameter for UI control
 
