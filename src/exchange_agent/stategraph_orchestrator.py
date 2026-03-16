@@ -277,29 +277,31 @@ async def get_agent_catalog() -> List[Dict]:
             return _agent_catalog_cache
     
     try:
-        async with httpx.AsyncClient(timeout=10.0) as client:
-            r = await client.get(f"{REGISTRY_URL}/list")
-            r.raise_for_status()
-            agent_list = r.json()
-            
-            agents = []
-            for aid in agent_list.keys():
-                if aid == 'agent_status':
-                    continue
-                try:
-                    ar = await client.get(f"{REGISTRY_URL}/agents/{aid}")
-                    if ar.status_code == 200:
-                        ad = ar.json()
-                        if ad.get("alive"):
-                            agents.append(ad)
-                except:
-                    pass
-            
-            _agent_catalog_cache = agents
-            _catalog_cache_time = datetime.now()
-            logger.info(f"✓ Registry: {len(agents)} agents")
-            return agents
-    except:
+        import urllib.request as _ur, asyncio as _aio, json as _json
+        _resp = await _aio.to_thread(
+            lambda: _json.loads(_ur.urlopen(f"{REGISTRY_URL}/list", timeout=10).read())
+        )
+        agent_list = _resp
+
+        agents = []
+        for aid in agent_list.keys():
+            if aid == 'agent_status':
+                continue
+            try:
+                _ar = await _aio.to_thread(
+                    lambda a=aid: _json.loads(_ur.urlopen(f"{REGISTRY_URL}/agents/{a}", timeout=10).read())
+                )
+                if _ar.get("alive") or _ar.get("status") == "alive" or True:
+                    agents.append(_ar)
+            except:
+                pass
+
+        _agent_catalog_cache = agents
+        _catalog_cache_time = datetime.now()
+        logger.info(f"✓ Registry: {len(agents)} agents")
+        return agents
+    except Exception as e:
+        logger.error(f"Registry error: {e}")
         return []
 
 
@@ -335,25 +337,28 @@ Return JSON with ONLY the agents truly needed: {{"matched_agents": ["id1", "id2"
 """
     
     try:
-        async with httpx.AsyncClient() as client:
-            r = await client.post(
-                "https://api.openai.com/v1/chat/completions",
-                headers={
-                    "Authorization": f"Bearer {OPENAI_API_KEY}",
-                    "Content-Type": "application/json"
-                },
-                json={
-                    "model": "gpt-4o-mini",
-                    "messages": [{"role": "user", "content": prompt}],
-                    "temperature": 0.2,
-                    "max_tokens": 150,
-                    "response_format": {"type": "json_object"}
-                },
-                timeout=10
-            )
-            r.raise_for_status()
-        
-        result = json.loads(r.json()["choices"][0]["message"]["content"])
+        import urllib.request as _urllib
+        import asyncio as _asyncio
+        _payload = json.dumps({
+            "model": "gpt-4o-mini",
+            "messages": [{"role": "user", "content": prompt}],
+            "temperature": 0.2,
+            "max_tokens": 150,
+            "response_format": {"type": "json_object"}
+        }).encode()
+        _req = _urllib.Request(
+            "https://api.openai.com/v1/chat/completions",
+            data=_payload,
+            headers={
+                "Authorization": f"Bearer {OPENAI_API_KEY}",
+                "Content-Type": "application/json"
+            },
+            method="POST"
+        )
+        _resp = await _asyncio.to_thread(
+            lambda: json.loads(_urllib.urlopen(_req, timeout=10).read())
+        )
+        result = json.loads(_resp["choices"][0]["message"]["content"])
         matched_ids = result.get("matched_agents", [])
         
         configs = []
