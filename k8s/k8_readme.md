@@ -555,6 +555,7 @@ MbtaWinter2026/
 | `GET` | `/switchboard/registries` | Show local and federated registry connectivity |
 | `GET` | `/switchboard/lookup/@neu:<agent>` | Federated lookup through Northeastern adapter |
 | `GET` | `/switchboard/lookup/@agntcy:<agent>` | Federated lookup through AGNTCY adapter |
+| `GET` | `/switchboard/diagnostics?agent=mbta-alerts` | Federation diagnostics with upstream state classification |
 
 ## Federation Setup And Verification
 
@@ -583,7 +584,19 @@ curl "http://localhost:6900/switchboard/lookup/@neu:mbta-alerts"
 curl "http://localhost:6900/switchboard/lookup/@agntcy:mbta-alerts"
 ```
 
-6. Optional: enable mirrored registration by setting in [k8s/configmap.yaml](k8s/configmap.yaml):
+6. Run diagnostics to classify upstream state per registry:
+
+```bash
+curl "http://localhost:6900/switchboard/diagnostics?agent=mbta-alerts"
+```
+
+Diagnostics classify external registries as:
+- `upstream_unavailable`: connectivity or transport failure to upstream
+- `reachable_empty_result`: upstream reachable but sample agent not found
+- `reachable_schema_mismatch`: upstream response shape does not match expected fields
+- `reachable_found`: sample agent resolved successfully
+
+7. Optional: enable mirrored registration by setting in [k8s/configmap.yaml](k8s/configmap.yaml):
   - `ENABLE_EXTERNAL_REGISTRATION: "true"`
   - `NEU_REGISTRY_REGISTER_URL`
   - `AGNTCY_REGISTER_WEBHOOK_URL`

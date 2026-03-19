@@ -137,9 +137,71 @@ def _http_json(
             return None
         print(f"⚠️  HTTP error calling {url}: {e}")
         return None
-    except (URLError, ValueError, TimeoutError) as e:
+    except (URLError, ValueError, TimeoutError, ConnectionResetError, OSError) as e:
         print(f"⚠️  Request error calling {url}: {e}")
         return None
+
+
+def _http_probe_json(
+    url: str,
+    method: str = "GET",
+    payload: Optional[Dict[str, Any]] = None,
+    headers: Optional[Dict[str, str]] = None,
+    timeout: Optional[float] = None,
+) -> Dict[str, Any]:
+    body = None
+    req_headers = {"Accept": "application/json"}
+    if headers:
+        req_headers.update(headers)
+
+    if payload is not None:
+        body = json.dumps(payload).encode("utf-8")
+        req_headers["Content-Type"] = "application/json"
+
+    req = Request(url=url, data=body, headers=req_headers, method=method)
+    timeout_value = timeout if timeout is not None else SWITCHBOARD_TIMEOUT_SECONDS
+
+    try:
+        with urlopen(req, timeout=timeout_value) as resp:
+            status_code = getattr(resp, "status", 200)
+            raw = resp.read().decode("utf-8")
+            parsed: Any = None
+            if raw:
+                try:
+                    parsed = json.loads(raw)
+                except ValueError:
+                    parsed = {"raw": raw}
+            return {
+                "ok": True,
+                "status_code": status_code,
+                "error": None,
+                "data": parsed,
+            }
+    except HTTPError as e:
+        raw = ""
+        try:
+            raw = e.read().decode("utf-8")
+        except Exception:
+            raw = ""
+        parsed: Any = None
+        if raw:
+            try:
+                parsed = json.loads(raw)
+            except ValueError:
+                parsed = {"raw": raw}
+        return {
+            "ok": False,
+            "status_code": e.code,
+            "error": str(e),
+            "data": parsed,
+        }
+    except (URLError, ValueError, TimeoutError, ConnectionResetError, OSError) as e:
+        return {
+            "ok": False,
+            "status_code": None,
+            "error": str(e),
+            "data": None,
+        }
 
 
 def _build_agent_payload(agent_id: str) -> Dict[str, Any]:
@@ -310,6 +372,130 @@ def _switchboard_registry_status() -> Dict[str, Any]:
         "count": len(registries),
         "federation_enabled": ENABLE_FEDERATION,
         "registries": registries,
+    }
+
+
+def _agntcy_candidates_from_data(data: Any) -> List[Dict[str, Any]]:
+    if not isinstance(data, dict):
+        return []
+
+    candidates: List[Dict[str, Any]] = []
+    for key in ("records", "results", "items", "agents"):
+        value = data.get(key)
+        if isinstance(value, list):
+            candidates.extend([v for v in value if isinstance(v, dict)])
+
+    if not candidates and isinstance(data.get("record"), dict):
+        candidates.append(data["record"])
+
+    if not candidates and data.get("name"):
+        candidates.append(data)
+
+    return candidates
+
+
+def _diagnose_neu(sample_agent: str) -> Dict[str, Any]:
+    out: Dict[str, Any] = {
+        "configured": bool(NEU_REGISTRY_URL),
+        "registry_url": NEU_REGISTRY_URL,
+        "state": "not_configured",
+    }
+    if not NEU_REGISTRY_URL:
+        return out
+
+    health = _http_probe_json(f"{NEU_REGISTRY_URL}/health")
+    out["health_probe"] = {
+        "ok": health.get("ok", False),
+        "status_code": health.get("status_code"),
+        "error": health.get("error"),
+    }
+    if not health.get("ok"):
+        out["state"] = "upstream_unavailable"
+        return out
+
+    agent_path = quote(sample_agent, safe="")
+    by_agent = _http_probe_json(f"{NEU_REGISTRY_URL}/agents/{agent_path}")
+    by_lookup = _http_probe_json(f"{NEU_REGISTRY_URL}/lookup/{agent_path}")
+    out["sample_agent"] = sample_agent
+    out["sample_probe"] = {
+        "agents_status": by_agent.get("status_code"),
+        "lookup_status": by_lookup.get("status_code"),
+    }
+
+    if by_agent.get("ok") or by_lookup.get("ok"):
+        out["state"] = "reachable_found"
+    elif by_agent.get("status_code") == 404 and by_lookup.get("status_code") == 404:
+        out["state"] = "reachable_empty_result"
+    else:
+        out["state"] = "reachable_schema_mismatch_or_error"
+        out["sample_probe"]["agents_error"] = by_agent.get("error")
+        out["sample_probe"]["lookup_error"] = by_lookup.get("error")
+
+    return out
+
+
+def _diagnose_agntcy(sample_agent: str) -> Dict[str, Any]:
+    out: Dict[str, Any] = {
+        "configured": bool(AGNTCY_ADS_URL),
+        "server_address": AGNTCY_ADS_URL,
+        "search_path": AGNTCY_ADS_SEARCH_PATH,
+        "state": "not_configured",
+    }
+    if not AGNTCY_ADS_URL:
+        return out
+
+    headers: Dict[str, str] = {}
+    if AGNTCY_ADS_TOKEN:
+        headers["Authorization"] = f"Bearer {AGNTCY_ADS_TOKEN}"
+
+    query = urlencode({"name": sample_agent})
+    url = f"{AGNTCY_ADS_URL}{AGNTCY_ADS_SEARCH_PATH}?{query}"
+    probe = _http_probe_json(url, headers=headers)
+    out["sample_agent"] = sample_agent
+    out["sample_probe"] = {
+        "status_code": probe.get("status_code"),
+        "error": probe.get("error"),
+    }
+
+    if not probe.get("ok"):
+        out["state"] = "upstream_unavailable"
+        return out
+
+    data = probe.get("data")
+    candidates = _agntcy_candidates_from_data(data)
+    out["sample_probe"]["candidate_count"] = len(candidates)
+
+    if candidates:
+        for candidate in candidates:
+            name = str(candidate.get("name", "")).strip()
+            if name == sample_agent or name.endswith(sample_agent):
+                out["state"] = "reachable_found"
+                return out
+        out["state"] = "reachable_empty_result"
+        return out
+
+    if isinstance(data, dict):
+        known_shape = any(k in data for k in ("records", "results", "items", "agents", "record", "name"))
+        out["state"] = "reachable_empty_result" if known_shape else "reachable_schema_mismatch"
+        out["sample_probe"]["top_level_keys"] = list(data.keys())[:20]
+        return out
+
+    out["state"] = "reachable_schema_mismatch"
+    return out
+
+
+def _switchboard_diagnostics(sample_agent: str) -> Dict[str, Any]:
+    return {
+        "federation_enabled": ENABLE_FEDERATION,
+        "sample_agent": sample_agent,
+        "registries": {
+            "nanda": {
+                "configured": True,
+                "state": "active_local",
+            },
+            "neu": _diagnose_neu(sample_agent),
+            "agntcy": _diagnose_agntcy(sample_agent),
+        },
     }
 
 
@@ -601,6 +787,12 @@ def switchboard_lookup(identifier):
     if payload is None:
         return jsonify({"error": f"ID '{identifier}' not found in federated registries"}), 404
     return jsonify(payload)
+
+
+@app.route("/switchboard/diagnostics", methods=["GET"])
+def switchboard_diagnostics():
+    sample_agent = request.args.get("agent", "mbta-alerts").strip() or "mbta-alerts"
+    return jsonify(_switchboard_diagnostics(sample_agent))
 
 
 @app.route("/list", methods=["GET"])
