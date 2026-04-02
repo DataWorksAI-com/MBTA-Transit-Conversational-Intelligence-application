@@ -56,6 +56,8 @@ spec:
                 configMapKeyRef:
                   name: mbta-config
                   key: SWITCHBOARD_TIMEOUT_SECONDS
+            # Internal or external AGNTCY ADS endpoint used by the
+            # switchboard adapter when federation is enabled.
             - name: AGNTCY_ADS_URL
               valueFrom:
                 configMapKeyRef:

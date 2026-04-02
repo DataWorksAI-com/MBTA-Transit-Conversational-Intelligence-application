@@ -35,9 +35,17 @@ data:
   LOG_LEVEL: "INFO"
 
   # Registry federation (switchboard mode)
+  # Demo target topology:
+  #   - external MIT-NANDA -> mbta-stopfinder
+  #   - internal Northeastern NANDA -> mbta-alerts
+  #   - internal AGNTCY ADS -> mbta-planner
   ENABLE_FEDERATION: "false"
   SWITCHBOARD_TIMEOUT_SECONDS: "5"
+  # Official AGNTCY DIR/ADS exposes gRPC on port 8888. The current MBTA
+  # registry adapter still uses a legacy HTTP lookup path, so this setting is
+  # deployment-ready but will only become functional once the adapter is updated.
   AGNTCY_ADS_URL: ""
+  # Legacy adapter setting. Official DIR/ADS does not expose /v1/search.
   AGNTCY_ADS_SEARCH_PATH: "/v1/search"
   NEU_REGISTRY_URL: ""
 
