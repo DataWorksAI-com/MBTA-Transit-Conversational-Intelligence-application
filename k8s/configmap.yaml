@@ -35,11 +35,22 @@ data:
   LOG_LEVEL: "INFO"
 
   # Registry federation (switchboard mode)
-  ENABLE_FEDERATION: "false"
+  # Demo target topology:
+  #   - external MIT-NANDA -> mbta-stopfinder
+  #   - internal Northeastern NANDA -> mbta-alerts
+  #   - internal AGNTCY ADS -> mbta-planner
+  ENABLE_FEDERATION: "true"
   SWITCHBOARD_TIMEOUT_SECONDS: "5"
+  # Northeastern NANDA registry (HTTP). Set to the actual deployment address.
+  NEU_REGISTRY_URL: "http://neu-registry:6900"
+  # AGNTCY ADS gRPC server address (host:port, no scheme). Used by the
+  # agntcy-dir SDK for native gRPC discovery. Set to the K8s service address
+  # once the internal ADS Helm release is deployed.
+  AGNTCY_ADS_GRPC_ADDRESS: "mbta-ads-apiserver.mbta-ads.svc.cluster.local:8888"
+  # Legacy HTTP adapter settings. Kept for backwards-compat; the gRPC path
+  # takes priority when AGNTCY_ADS_GRPC_ADDRESS is set.
   AGNTCY_ADS_URL: ""
   AGNTCY_ADS_SEARCH_PATH: "/v1/search"
-  NEU_REGISTRY_URL: ""
 
   # Optional external registration settings
   ENABLE_EXTERNAL_REGISTRATION: "false"
