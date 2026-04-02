@@ -321,19 +321,32 @@ Available Agents:
 {catalog_text}
 
 MATCHING RULES:
-1. If query is ONLY about alerts/delays/disruptions (no routing) → ONLY alerts agent
+1. If query is ONLY about alerts/delays/disruptions (no routing, no weather) → ONLY mbta-alerts
    Examples: "Red Line delays?", "Should I wait?", "How long will delays last?", "Why delays?"
 
-2. If query asks for route/directions with origin and destination → stopfinder + alerts + planner
+2. If query asks for route/directions with origin and destination → mbta-stopfinder + mbta-alerts + mbta-planner
    Examples: "Route from Park to Harvard", "Get from X to Y", "How do I get to Harvard?"
 
-3. If query asks about stops/stations (no routing) → ONLY stopfinder agent
+3. If query asks about stops/stations (no routing) → ONLY mbta-stopfinder
    Examples: "Find Harvard station", "Stops on Red Line"
 
-DO NOT match planner agent for queries that don't have explicit routing intent (from X to Y).
-DO NOT match planner for queries asking about delay duration, wait times, or disruption analysis.
+4. If query is about Boston-area weather, commute weather risk, or MBTA service risk from conditions
+   (snow, ice, freezing rain, sleet, rain, wind, flooding, fog, heat, cold, "should I leave earlier",
+   "will the T be ok", "is the Red Line safe in this weather") → include mbta-boston-weather-agent.
+   If the query is ONLY weather/transit-risk (no live delay question, no routing) → ONLY mbta-boston-weather-agent.
+
+5. If query combines weather/disruption risk with a specific trip (from X to Y) → mbta-boston-weather-agent
+   plus mbta-stopfinder + mbta-alerts + mbta-planner (same as rule 2, plus weather).
+
+6. If query asks both about weather/transit-risk AND current service problems (no explicit from/to route) →
+   mbta-boston-weather-agent + mbta-alerts.
+
+DO NOT match mbta-planner for queries that don't have explicit routing intent (from X to Y).
+DO NOT match mbta-planner for queries asking about delay duration, wait times, or disruption analysis alone.
+DO NOT match mbta-boston-weather-agent when the user only asks about schedules or stops with no weather or climate mention.
 
 Return JSON with ONLY the agents truly needed: {{"matched_agents": ["id1", "id2"]}}
+Use exact agent_id strings from the Available Agents list (e.g. mbta-boston-weather-agent).
 """
     
     try:
@@ -343,7 +356,7 @@ Return JSON with ONLY the agents truly needed: {{"matched_agents": ["id1", "id2"
             "model": "gpt-4o-mini",
             "messages": [{"role": "user", "content": prompt}],
             "temperature": 0.2,
-            "max_tokens": 150,
+            "max_tokens": 220,
             "response_format": {"type": "json_object"}
         }).encode()
         _req = _urllib.Request(
@@ -471,6 +484,8 @@ async def discovery_node(state: AgentState) -> AgentState:
                 intent, conf = "alerts", 0.85
             elif any(w in d for w in ["stop", "station"]):
                 intent, conf = "stop_info", 0.85
+            elif any(w in d for w in ["weather", "forecast", "snow", "rain", "wind", "hazard", "climate"]):
+                intent, conf = "weather", 0.85
         
         # Parse origin/destination
         parsed = extract_origin_destination(state["user_message"])
