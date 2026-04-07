@@ -513,9 +513,9 @@ MbtaWinter2026/
 | `USE_SLIM` | Exchange | Enable SLIM transport (`true`/`false`) |
 | `REGISTRY_URL` | Exchange | NANDA registry endpoint |
 | `ENABLE_FEDERATION` | Registry | Enable switchboard-style federated lookups across registries |
-| `AGNTCY_ADS_URL` | Registry | AGNTCY ADS base URL used by the federation adapter |
-| `AGNTCY_ADS_SEARCH_PATH` | Registry | AGNTCY search path (default: `/v1/search`) |
-| `AGNTCY_ADS_TOKEN` | Registry (secret) | Optional bearer token for AGNTCY ADS |
+| `AGNTCY_ADS_URL` | Registry | Legacy AGNTCY adapter setting. Official DIR/ADS uses gRPC on `host:8888`, so this remains a placeholder until the adapter is updated |
+| `AGNTCY_ADS_SEARCH_PATH` | Registry | Legacy HTTP search path retained for compatibility with the current adapter; official DIR/ADS does not use `/v1/search` |
+| `AGNTCY_ADS_TOKEN` | Registry (secret) | Optional bearer token for internal or external AGNTCY ADS |
 | `NEU_REGISTRY_URL` | Registry | Northeastern registry base URL used by the federation adapter |
 | `ENABLE_EXTERNAL_REGISTRATION` | Register job | Mirror MBTA agent registrations to external registries |
 | `NEU_REGISTRY_REGISTER_URL` | Register job | External NEU register endpoint for mirroring |
@@ -613,6 +613,47 @@ python scripts/check_switchboard_diagnostics.py \
   --expect-neu reachable_found \
   --expect-agntcy reachable_found
 ```
+
+### Internal ADS Deployment Path
+
+The demo target topology places `mbta-planner` in internal AGNTCY ADS. The correct deployment path for that service is the official AGNTCY Directory Helm chart, not a hand-written Deployment manifest.
+
+For the April 10 demo, the intended operating mode is dev mode with SPIRE-based auth disabled. That keeps the install portable on LKE while preserving the option to add production-grade SPIRE mTLS later.
+
+To wire internal ADS into the Kubernetes deployment:
+
+1. Create `k8s/agntcy-dir-values.yaml` from [k8s/agntcy-dir-values.example.yaml](k8s/agntcy-dir-values.example.yaml).
+2. Export `DEPLOY_INTERNAL_AGNTCY_ADS=true` before running `bash deploy.sh apply`.
+3. Optionally export `AGNTCY_DIR_CHART_VERSION` if you need a version other than `v1.0.0`.
+4. Optionally export `AGNTCY_DIR_RELEASE_NAME=mbta-ads` and `AGNTCY_DIR_NAMESPACE=mbta-ads` if you need to override the demo defaults.
+5. Enable federation by setting `ENABLE_FEDERATION: "true"`.
+
+`deploy.sh apply` will automatically install the chart from `oci://ghcr.io/agntcy/dir/helm-charts/dir` when both conditions are true:
+
+- `DEPLOY_INTERNAL_AGNTCY_ADS=true`
+- `k8s/agntcy-dir-values.yaml` exists
+
+The official DIR/ADS service characteristics are:
+
+- gRPC API on port `8888`
+- libp2p routing/DHT on port `5555`
+- routing remains `ClusterIP`/internal-only for the demo; do not expose `5555` externally
+- no HTTP `/health` endpoint; use gRPC health probes
+- backing dependencies on Zot and PostgreSQL, both bundled by the Helm chart
+- demo auth stance is `authn.enabled: false` with `authz.enabled: true` and a permissive policy so the structure is in place for later tightening
+
+Current limitation: [src/registry/registry.py](src/registry/registry.py) still uses an HTTP-style AGNTCY adapter (`AGNTCY_ADS_URL` + `/v1/search`). This branch deploys the internal ADS infrastructure, but live MBTA registry lookups against official DIR/ADS still require a follow-up PR to switch the adapter to gRPC.
+
+Suggested operator checks for internal ADS:
+
+```bash
+kubectl -n mbta-ads get pods
+kubectl -n mbta-ads get svc
+kubectl -n mbta-ads port-forward svc/mbta-ads-apiserver 8888:8888
+grpcurl -plaintext localhost:8888 grpc.health.v1.Health/Check
+```
+
+If your Helm release name is not `mbta-ads`, adjust the `mbta-ads-apiserver` service name accordingly.
 
 ---
 
