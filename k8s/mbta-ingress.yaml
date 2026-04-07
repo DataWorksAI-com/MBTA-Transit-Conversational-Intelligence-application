@@ -1,53 +1,102 @@
+# NGINX Ingress: Public subdomain routing for MBTA agents
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: mbta-ingress
+  name: mbta-agents-ingress
   namespace: mbta
+  labels:
+    app.kubernetes.io/part-of: mbta-winter-2026
   annotations:
-    kubernetes.io/ingress.class: nginx
+    nginx.ingress.kubernetes.io/rewrite-target: /
     nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
     nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
     nginx.ingress.kubernetes.io/proxy-connect-timeout: "3600"
     nginx.ingress.kubernetes.io/proxy-http-version: "1.1"
 spec:
+  ingressClassName: nginx
   rules:
-  - host: mbta.agent.mitdataworksai.com
-    http:
-      paths:
-      - pathType: Prefix
-        path: "/"
-        backend:
-          service:
-            name: frontend
-            port:
-              number: 3000
-  - host: exchange-new.agent.mitdataworksai.com
-    http:
-      paths:
-      - pathType: Prefix
-        path: "/"
-        backend:
-          service:
-            name: exchange
-            port:
-              number: 8100
-  - host: grafana.agent.mitdataworksai.com
-    http:
-      paths:
-      - pathType: Prefix
-        path: "/"
-        backend:
-          service:
-            name: grafana
-            port:
-              number: 3001
-  - host: jaeger.agent.mitdataworksai.com
-    http:
-      paths:
-      - pathType: Prefix
-        path: "/"
-        backend:
-          service:
-            name: jaeger
-            port:
-              number: 16686
+      # StopFinder Agent — registered in external MIT-NANDA registry
+      # Public endpoint required for federated discovery demo
+    - host: stopfinder.agent.mitdataworksai.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: stopfinder-agent
+                port:
+                  number: 8003
+
+      # Alerts Agent
+    - host: alerts.agent.mitdataworksai.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: alerts-agent
+                port:
+                  number: 8001
+
+    # Planner Agent — registered in internal AGNTCY ADS via gRPC
+    # Public endpoint required for federated discovery demo
+    - host: planner.agent.mitdataworksai.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: planner-agent
+                port:
+                  number: 8002
+
+    # Frontend Chat UI
+    - host: mbta.agent.mitdataworksai.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: frontend
+                port:
+                  number: 3000
+
+    # Switchboard Exchange
+    - host: exchange-new.agent.mitdataworksai.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: exchange
+                port:
+                  number: 8100
+
+    # Grafana
+    - host: grafana.agent.mitdataworksai.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: grafana
+                port:
+                  number: 3001
+
+    # Jaeger
+    - host: jaeger.agent.mitdataworksai.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+              backend:
+                service:
+                  name: jaeger
+                  port:
+                    number: 16686
