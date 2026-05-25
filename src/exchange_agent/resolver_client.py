@@ -57,12 +57,16 @@ def get_urn_for_agent(agent_id: str) -> Optional[str]:
 @dataclass
 class ResolvedAgent:
     """Result returned by ResolverClient.resolve()."""
-    endpoint_url: str       # e.g. "http://96.126.111.107:8001"
-    protocol: str           # e.g. "A2A"
-    ttl: int                # cache TTL in seconds
-    cached: bool            # True if this was a cache hit at the resolver
-    latency_ms: float       # round-trip time to the resolver (ms)
-    metadata: dict          # raw metadata from auth NS
+    endpoint_url: str           # e.g. "http://96.126.111.107:8001"
+    protocol: str               # e.g. "a2a" — DANS-negotiated protocol (lowercase)
+    ttl: int                    # cache TTL in seconds
+    cached: bool                # True if this was a cache hit at the resolver
+    latency_ms: float           # round-trip time to the resolver (ms)
+    metadata: dict              # raw metadata from DANS
+    protocol_metadata: dict     # per-protocol hints: {"version": "0.2.1", "path": "/a2a/message", …}
+    negotiated_by: str          # "intersection" | "agent_default" | "fallback"
+    fallback_protocol: str      # next best protocol if primary fails (or "")
+    warning: str                # present when negotiated_by == "fallback" (or "")
 
 
 class ResolverClient:
@@ -78,6 +82,10 @@ class ResolverClient:
         self.timeout = float(os.getenv("ANS_RESOLVER_TIMEOUT", "5.0"))
         logger.info(f"ResolverClient initialized: {self.resolver_url}")
 
+    # Protocols this exchange agent can speak — passed to DANS so it can negotiate
+    # the best match with the target agent's registered protocols.
+    CALLER_PROTOCOLS = ["slim", "a2a", "http"]
+
     async def resolve(
         self,
         urn: str,
@@ -87,11 +95,17 @@ class ResolverClient:
         """
         Resolve a URN to a live agent endpoint.
 
+        Passes CALLER_PROTOCOLS so DANS can negotiate the best protocol match.
         Returns ResolvedAgent on success, None on any failure.
         Never raises — failures are logged as warnings.
         """
         if not urn:
             return None
+
+        # Merge caller-declared protocols into requester_context so DANS can negotiate
+        ctx = dict(requester_context or {})
+        if "protocols" not in ctx:
+            ctx["protocols"] = self.CALLER_PROTOCOLS
 
         t0 = _time.monotonic()
         try:
@@ -100,7 +114,7 @@ class ResolverClient:
                     f"{self.resolver_url}/resolve",
                     json={
                         "agent_name": urn,
-                        "requester_context": requester_context or {},
+                        "requester_context": ctx,
                         "cache_enabled": cache_enabled,
                     },
                 )
@@ -128,13 +142,29 @@ class ResolverClient:
             logger.warning(f"ANS resolver response missing 'endpoint' for {urn}")
             return None
 
+        protocol = data.get("protocol", "http").lower()
+        negotiated_by = data.get("negotiated_by", "unknown")
+        fallback_protocol = data.get("fallback_protocol") or ""
+        warning = data.get("warning") or ""
+
+        logger.info(
+            f"DANS protocol negotiation: {urn} → {protocol} "
+            f"(negotiated_by={negotiated_by}"
+            + (f", warning={warning}" if warning else "")
+            + ")"
+        )
+
         return ResolvedAgent(
             endpoint_url=endpoint,
-            protocol=data.get("protocol", "A2A"),
+            protocol=protocol,
             ttl=data.get("ttl", 300),
             cached=data.get("cached", False),
             latency_ms=round(elapsed_ms, 2),
             metadata=data.get("metadata", {}),
+            protocol_metadata=data.get("protocol_metadata", {}),
+            negotiated_by=negotiated_by,
+            fallback_protocol=fallback_protocol,
+            warning=warning,
         )
 
     async def health_check(self) -> bool:

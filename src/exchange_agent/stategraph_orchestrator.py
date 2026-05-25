@@ -112,6 +112,8 @@ class AgentConfig:
     relevance_score: float = 0.0
     resolved_via_ans: bool = False  # True when endpoint came from ANS resolution
     full_proxy_url: str = ""        # Set when ANS returns a proxy URL with a path (e.g. /dans/proxy/planner)
+    resolved_protocol: str = ""     # Protocol negotiated by DANS (e.g. "slim", "a2a", "http")
+    protocol_metadata: dict = None  # Per-protocol hints from DANS registration
 
 
 # ============================================================================
@@ -907,6 +909,8 @@ async def execute_agents_node(state: AgentState) -> AgentState:
                                 relevance_score=scores.get(agent_id, 0.0),
                                 resolved_via_ans=True,
                                 full_proxy_url=resolved.endpoint_url if has_path else "",
+                                resolved_protocol=resolved.protocol,
+                                protocol_metadata=getattr(resolved, "protocol_metadata", {}) or {},
                             )
                             span.set_attribute("ans.endpoint", resolved.endpoint_url)
                             span.set_attribute("ans.cached", resolved.cached)
@@ -925,7 +929,10 @@ async def execute_agents_node(state: AgentState) -> AgentState:
                                 "agent_id": agent_id,
                                 "urn": urn,
                                 "endpoint": resolved.endpoint_url,
-                                "protocol": getattr(resolved, "protocol", "A2A"),
+                                "protocol": resolved.protocol,
+                                "negotiated_by": getattr(resolved, "negotiated_by", "unknown"),
+                                "protocol_metadata": getattr(resolved, "protocol_metadata", {}),
+                                "fallback_protocol": getattr(resolved, "fallback_protocol", ""),
                                 "cached": resolved.cached,
                                 "latency_ms": round(resolved.latency_ms, 1),
                                 "is_foreign": _is_foreign,
@@ -998,7 +1005,12 @@ async def execute_agents_node(state: AgentState) -> AgentState:
                 config = agent_configs[sf_id]
                 logger.info(f"📍 stop_info: calling {sf_id} directly with full query")
                 try:
-                    if _current_orchestrator and _current_orchestrator.use_slim and _current_orchestrator.slim_client:
+                    _sf_proto = getattr(config, "resolved_protocol", "").lower()
+                    _sf_slim = (
+                        _sf_proto == "slim"
+                        or (not _sf_proto and _current_orchestrator and _current_orchestrator.use_slim)
+                    )
+                    if _sf_slim and _current_orchestrator and _current_orchestrator.slim_client:
                         try:
                             result = await call_agent_slim(_current_orchestrator.slim_client, config, state["user_message"])
                         except:
@@ -1200,12 +1212,26 @@ Plan the route between these stations."""
         # ── Run all agents concurrently ──────────────────────────────────────────
         async def _run_one(agent_id: str, config, agent_query: str):
             with tracer.start_as_current_span(f"agent_{agent_id}"):
-                if _current_orchestrator and _current_orchestrator.use_slim and _current_orchestrator.slim_client:
+                # Use protocol negotiated by DANS (stored in config.resolved_protocol).
+                # Fall back to global use_slim flag for non-ANS paths.
+                _resolved_proto = getattr(config, "resolved_protocol", "").lower()
+                _use_slim = (
+                    _resolved_proto == "slim"
+                    or (
+                        not _resolved_proto
+                        and _current_orchestrator
+                        and _current_orchestrator.use_slim
+                    )
+                )
+                if _use_slim and _current_orchestrator and _current_orchestrator.slim_client:
                     try:
+                        logger.info(f"🔀 {agent_id}: using SLIM (protocol={_resolved_proto or 'global_flag'})")
                         return await call_agent_slim(_current_orchestrator.slim_client, config, agent_query)
                     except Exception:
+                        logger.info(f"⬇️  {agent_id}: SLIM failed, falling back to HTTP")
                         return await call_agent_http(config, agent_query, state["conversation_id"])
                 else:
+                    logger.info(f"🔀 {agent_id}: using HTTP (protocol={_resolved_proto or 'http'})")
                     return await call_agent_http(config, agent_query, state["conversation_id"])
 
         logger.info(f"⚡ Running {len(agent_task_list)} agents in parallel: {[t[0] for t in agent_task_list]}")
@@ -1562,7 +1588,7 @@ class StateGraphOrchestrator:
                 "metadata": {
                     "conversation_id": conversation_id,
                     "discovery": final.get("discovery_method", "semantic_v45"),
-                    "transport": "slim" if self.use_slim else "http",
+                    "transport": "dans_negotiated" if self.use_ans else ("slim" if self.use_slim else "http"),
                     "semantic_scores": final.get("semantic_scores", {}),
                     "optimization": {
                         "stopfinder_skipped": not final.get("resolved_origin") and not final.get("resolved_destination"),
