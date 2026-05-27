@@ -623,29 +623,42 @@ async def call_agent_http(config: AgentConfig, msg: str, conv_id: str) -> Dict:
 
 
 async def call_stopfinder_for_location(location: str, config: AgentConfig, conv_id: str) -> str:
-    """Call StopFinder and extract station name"""
+    """Call StopFinder and extract station name.
+
+    Uses DANS-negotiated protocol (config.resolved_protocol) when available;
+    falls back to the global USE_SLIM flag for non-ANS paths.
+    """
     if not location:
         return ""
-    
+
     query = f"Find station: {location}"
-    
+
     global _current_orchestrator
-    
+
     try:
-        if _current_orchestrator and _current_orchestrator.use_slim and _current_orchestrator.slim_client:
+        # Prefer DANS-negotiated protocol; fall back to global flag
+        _proto = getattr(config, "resolved_protocol", "").lower()
+        _use_slim = (
+            _proto == "slim"
+            or (not _proto and _current_orchestrator and _current_orchestrator.use_slim)
+        )
+        if _use_slim and _current_orchestrator and _current_orchestrator.slim_client:
+            logger.info(f"   StopFinder location resolve via SLIM (proto={_proto or 'global_flag'})")
             try:
                 result = await call_agent_slim(_current_orchestrator.slim_client, config, query)
-            except:
+            except Exception:
+                logger.info("   StopFinder SLIM failed, falling back to HTTP")
                 result = await call_agent_http(config, query, conv_id)
         else:
+            logger.info(f"   StopFinder location resolve via HTTP (proto={_proto or 'http'})")
             result = await call_agent_http(config, query, conv_id)
-        
+
         response_text = result.get("response", "")
         station = extract_station_from_stopfinder(response_text)
-        
+
         logger.info(f"   '{location}' → '{station}'")
         return station
-        
+
     except Exception as e:
         logger.error(f"StopFinder error for '{location}': {e}")
         return ""
@@ -1226,13 +1239,19 @@ Plan the route between these stations."""
                 if _use_slim and _current_orchestrator and _current_orchestrator.slim_client:
                     try:
                         logger.info(f"🔀 {agent_id}: using SLIM (protocol={_resolved_proto or 'global_flag'})")
-                        return await call_agent_slim(_current_orchestrator.slim_client, config, agent_query)
+                        result = await call_agent_slim(_current_orchestrator.slim_client, config, agent_query)
                     except Exception:
                         logger.info(f"⬇️  {agent_id}: SLIM failed, falling back to HTTP")
-                        return await call_agent_http(config, agent_query, state["conversation_id"])
+                        result = await call_agent_http(config, agent_query, state["conversation_id"])
+                        _resolved_proto = "http"  # reflect actual protocol used after fallback
                 else:
                     logger.info(f"🔀 {agent_id}: using HTTP (protocol={_resolved_proto or 'http'})")
-                    return await call_agent_http(config, agent_query, state["conversation_id"])
+                    result = await call_agent_http(config, agent_query, state["conversation_id"])
+                # Tag every result with the protocol that was actually used so the
+                # synthesize/UI layers can surface it without digging into ANS traces.
+                if isinstance(result, dict) and "protocol_used" not in result:
+                    result["protocol_used"] = _resolved_proto or ("slim" if _use_slim else "http")
+                return result
 
         logger.info(f"⚡ Running {len(agent_task_list)} agents in parallel: {[t[0] for t in agent_task_list]}")
 
@@ -1579,6 +1598,14 @@ class StateGraphOrchestrator:
             
             final = await self.graph.ainvoke(initial)
             
+            # Build per-agent protocol_used map from agent_responses + ans_traces
+            _agent_responses = final.get("agent_responses", [])
+            _protocol_used_map: Dict[str, str] = {
+                r["agent_used"]: r["protocol_used"]
+                for r in _agent_responses
+                if isinstance(r, dict) and r.get("agent_used") and r.get("protocol_used")
+            }
+
             return {
                 "response": final["final_response"],
                 "intent": final["intent"],
@@ -1589,6 +1616,7 @@ class StateGraphOrchestrator:
                     "conversation_id": conversation_id,
                     "discovery": final.get("discovery_method", "semantic_v45"),
                     "transport": "dans_negotiated" if self.use_ans else ("slim" if self.use_slim else "http"),
+                    "protocol_used": _protocol_used_map,  # per-agent protocol DANS negotiated
                     "semantic_scores": final.get("semantic_scores", {}),
                     "optimization": {
                         "stopfinder_skipped": not final.get("resolved_origin") and not final.get("resolved_destination"),

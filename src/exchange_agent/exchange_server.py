@@ -1452,12 +1452,17 @@ async def handle_a2a_path(query: str, conversation_id: str) -> tuple[str, Dict[s
             result = await stategraph_orchestrator.process_message(query, conversation_id)
 
             response_text = result.get("response", "")
+            _orch_meta = result.get("metadata", {})
             metadata = {
                 "stategraph_intent": result.get("intent"),
                 "stategraph_confidence": result.get("confidence"),
                 "agents_called": result.get("agents_called", []),
-                "graph_execution": result.get("metadata", {}).get("graph_execution", "completed"),
-                "ans_traces": result.get("metadata", {}).get("ans_traces", []),
+                "graph_execution": _orch_meta.get("graph_execution", "completed"),
+                "ans_traces": _orch_meta.get("ans_traces", []),
+                # Protocol Intelligence — surfaced for callers and the UI
+                "transport": _orch_meta.get("transport"),
+                "ans_enabled": _orch_meta.get("ans_enabled"),
+                "protocol_used": _orch_meta.get("protocol_used", {}),
             }
 
             span.set_attribute("agents_called", json.dumps(metadata['agents_called']))
