@@ -731,49 +731,8 @@ async def call_stopfinder_for_location(location: str, config: AgentConfig, conv_
 # NODES
 # ============================================================================
 
-async def firewall_node(state: AgentState) -> AgentState:
-    """
-    Gate-zero firewall check — runs before intent classification.
-    Evaluates EVERY message against DANS Firewall request rules regardless
-    of whether agents would have been called, catching injections that the
-    intent classifier would otherwise silently absorb as 'general' queries.
-    """
-    _dans_url = os.getenv("AGENTNS_URL", "").rstrip("/")
-    if not _dans_url:
-        return state  # firewall not configured, pass through
-
-    try:
-        async with httpx.AsyncClient(timeout=3.0) as _fw_client:
-            _fw_resp = await _fw_client.post(
-                f"{_dans_url}/firewall/test",
-                json={"label": "*", "body": {"message": state["user_message"]}},
-            )
-            if _fw_resp.status_code == 200:
-                _fw_decision = _fw_resp.json()
-                if _fw_decision.get("action") == "block":
-                    _reason = _fw_decision.get("reason", "firewall")
-                    logger.warning(f"🛡️ Gate-zero firewall block: {_reason} | msg={state['user_message'][:60]!r}")
-                    return {
-                        **state,
-                        "firewall_blocked": True,
-                        "agent_responses": [{
-                            "firewall_blocked": True,
-                            "reason": _reason,
-                            "response": "🛡️ Request blocked by DANS Firewall",
-                            "agent_used": "firewall",
-                        }],
-                        "agents_called": ["firewall_block"],
-                        "final_response": "🛡️ Request blocked by security policy.",
-                        "should_end": True,
-                    }
-    except Exception as _e:
-        logger.debug(f"Gate-zero firewall check skipped: {_e}")
-
-    return state
-
-
 def route_after_firewall(state: AgentState) -> str:
-    """Short-circuit to synthesize if the firewall already blocked the request."""
+    """Kept for graph compatibility — firewall enforcement is handled by DANS proxy layer."""
     if state.get("firewall_blocked"):
         return "synthesize"
     return "discovery"
@@ -1262,30 +1221,9 @@ Plan the route between these stations."""
 
             agent_task_list.append((agent_id, config, agent_query))
 
-        # ── Firewall preflight — check original user message before any agent calls ─
-        # This catches injections even when the planner receives a reformatted query.
-        _dans_url = os.getenv("AGENTNS_URL", "").rstrip("/")
-        if _dans_url and agent_task_list:
-            try:
-                async with httpx.AsyncClient(timeout=3.0) as _fw_client:
-                    _fw_resp = await _fw_client.post(
-                        f"{_dans_url}/firewall/test",
-                        json={"label": "*", "body": {"message": state["user_message"]}},
-                    )
-                    if _fw_resp.status_code == 200:
-                        _fw_decision = _fw_resp.json()
-                        if _fw_decision.get("action") == "block":
-                            _reason = _fw_decision.get("reason", "firewall")
-                            logger.warning(f"🛡️ Preflight block on original message: {_reason}")
-                            return {
-                                **state,
-                                "agent_responses": [{"firewall_blocked": True, "reason": _reason,
-                                                      "response": "🛡️ Request blocked by DANS Firewall",
-                                                      "agent_used": "firewall"}],
-                                "agents_called": ["firewall_block"],
-                            }
-            except Exception as _e:
-                logger.debug(f"Firewall preflight skipped: {_e}")
+        # Firewall enforcement is handled by the DANS proxy layer.
+        # When agent calls go through /dans/proxy/<label>, DANS checks firewall rules
+        # and returns 403 if blocked. call_agent_http() handles 403 responses.
 
         # ── Run all agents concurrently ──────────────────────────────────────────
         async def _run_one(agent_id: str, config, agent_query: str):
@@ -1521,16 +1459,13 @@ def route_after_execute(state: AgentState) -> Literal["synthesize"]:
 def build_graph() -> StateGraph:
     wf = StateGraph(AgentState)
 
-    wf.add_node("firewall", firewall_node)
     wf.add_node("discovery", discovery_node)
     wf.add_node("routing", routing_node)
     wf.add_node("execute", execute_agents_node)
     wf.add_node("synthesize", synthesize_node)
 
-    # Firewall is gate zero — every message passes through it first
-    wf.set_entry_point("firewall")
-    wf.add_conditional_edges("firewall", route_after_firewall,
-                             {"discovery": "discovery", "synthesize": "synthesize"})
+    # Discovery is the entry point — firewall enforcement happens at the DANS proxy layer
+    wf.set_entry_point("discovery")
 
     wf.add_conditional_edges("discovery", route_after_discovery,
                             {"routing": "routing", "synthesize": "synthesize"})

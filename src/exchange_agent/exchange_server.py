@@ -1076,33 +1076,10 @@ async def chat_endpoint(request: ChatRequest):
         logger.info(f"   Conversation ID: {conversation_id}")
         logger.info(f"   Force Protocol: {force_protocol}")
 
-        # ── Gate-zero Firewall check — runs before ANY routing (MCP or A2A) ──
-        _dans_url = os.getenv("AGENTNS_URL", "").rstrip("/")
-        if _dans_url:
-            try:
-                import httpx as _httpx
-                async with _httpx.AsyncClient(timeout=3.0) as _fw_client:
-                    _fw_resp = await _fw_client.post(
-                        f"{_dans_url}/firewall/test",
-                        json={"label": "*", "body": {"message": query}},
-                    )
-                    if _fw_resp.status_code == 200:
-                        _fw_decision = _fw_resp.json()
-                        if _fw_decision.get("action") == "block":
-                            _reason = _fw_decision.get("reason", "firewall")
-                            logger.warning(f"🛡️ Gate-zero block ({force_protocol}): {_reason} | {query[:60]!r}")
-                            latency_ms = int((time.time() - start_time) * 1000)
-                            return ChatResponse(
-                                response="🛡️ Request blocked by security policy.",
-                                path="firewall_block",
-                                latency_ms=latency_ms,
-                                intent="blocked",
-                                confidence=1.0,
-                                metadata={"firewall_rule": _reason, "protocol": force_protocol},
-                            )
-            except Exception as _e:
-                logger.debug(f"Gate-zero firewall check skipped: {_e}")
-        # ─────────────────────────────────────────────────────────────────────
+        # Note: Firewall enforcement happens at the DANS proxy layer (agent-to-agent calls).
+        # When the orchestrator calls agents via DANS proxy (/dans/proxy/<label>),
+        # DANS checks the firewall before forwarding. That is the correct placement.
+        # Application-level input filtering is the responsibility of the application itself.
 
         available_tools = []
         if mcp_client and mcp_client._initialized:

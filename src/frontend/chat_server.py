@@ -1,4 +1,4 @@
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import HTMLResponse, FileResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -1861,22 +1861,22 @@ async def get_ui():
                                 ? '<span class="ans-badge cached">⚡ CACHED</span>'
                                 : '<span class="ans-badge live">🔴 LIVE</span>';
                             const latencyStr = trace.latency_ms > 0 ? trace.latency_ms + 'ms' : '';
-                            return \`
+                            return `
                             <div class="ans-agent-section">
-                                <div class="ans-urn">\${trace.urn}</div>
+                                <div class="ans-urn">${trace.urn}</div>
                                 <div class="ans-hop">
                                     <span class="ans-hop-label">DANS</span>
-                                    <span class="ans-hop-addr">\${window.ANS_DANS_DISPLAY}</span>
-                                    \${trace.selected_by ? \`<span class="ans-badge" style="background:#1a4a7a;color:#7ec8f7;font-size:9px;padding:1px 5px;border-radius:3px;margin-left:6px">\${trace.selected_by}</span>\` : ''}
-                                    \${trace.region ? \`<span style="color:#888;font-size:9px;margin-left:4px">\${trace.flag || ''} \${trace.region}</span>\` : ''}
+                                    <span class="ans-hop-addr">${window.ANS_DANS_DISPLAY}</span>
+                                    ${trace.selected_by ? `<span class="ans-badge" style="background:#1a4a7a;color:#7ec8f7;font-size:9px;padding:1px 5px;border-radius:3px;margin-left:6px">${trace.selected_by}</span>` : ''}
+                                    ${trace.region ? `<span style="color:#888;font-size:9px;margin-left:4px">${trace.flag || ''} ${trace.region}</span>` : ''}
                                 </div>
                                 <div class="ans-hop-final">
                                     <span>✅</span>
-                                    <span class="endpoint">\${trace.endpoint}</span>
-                                    \${cachedBadge}
-                                    \${latencyStr ? '<span class="ans-latency">' + latencyStr + '</span>' : ''}
+                                    <span class="endpoint">${trace.endpoint}</span>
+                                    ${cachedBadge}
+                                    ${latencyStr ? '<span class="ans-latency">' + latencyStr + '</span>' : ''}
                                 </div>
-                            </div>\`;
+                            </div>`;
                         }).join('<hr style="border-color:#1a4a7a;margin:10px 0">')}
                     </div>` : '';
 
@@ -1899,22 +1899,22 @@ async def get_ui():
                             const latStr = c.latency_ms === Infinity ? '∞' : c.latency_ms + 'ms';
                             const selMark = isSelected ? ' ◀ SELECTED' : '';
                             const rowColor = isSelected ? '#4ecdc4' : '#888';
-                            const regionStr = c.region ? \` (\${c.region})\` : '';
-                            return \`<div class="candidate-row" style="color:\${rowColor}">
-                                \${healthIcon} \${c.endpoint}\${regionStr} — \${latStr}\${selMark}
-                            </div>\`;
+                            const regionStr = c.region ? ` (${c.region})` : '';
+                            return `<div class="candidate-row" style="color:${rowColor}">
+                                ${healthIcon} ${c.endpoint}${regionStr} — ${latStr}${selMark}
+                            </div>`;
                         }).join('') : '';
-                        return \`
+                        return `
                         <div class="foreign-agent-block">
-                            <div class="foreign-title">\${title}</div>
-                            <div class="foreign-urn">\${trace.urn}</div>
-                            \${candidates.length > 1 ? \`
+                            <div class="foreign-title">${title}</div>
+                            <div class="foreign-urn">${trace.urn}</div>
+                            ${candidates.length > 1 ? `
                             <div style="margin:8px 0 6px;font-size:10px;color:#a29bfe;font-weight:700;text-transform:uppercase;letter-spacing:.8px">
                                 ANS Candidate Selection
                             </div>
-                            <div class="candidates-block">\${candidateRows}</div>
-                            <div style="font-size:10px;color:#4ecdc4;margin:6px 0">\${selectionNote}</div>
-                            \` : ''}
+                            <div class="candidates-block">${candidateRows}</div>
+                            <div style="font-size:10px;color:#4ecdc4;margin:6px 0">${selectionNote}</div>
+                            ` : ''}
                             <div class="geo-route">
                                 <div class="geo-node">
                                     <div class="geo-flag">🇺🇸</div>
@@ -1923,22 +1923,22 @@ async def get_ui():
                                 </div>
                                 <div class="geo-arrow">
                                     <div class="geo-arrow-line"></div>
-                                    <div class="geo-km">\${isTrulyForeign ? '~6,200 km' : 'same region'}</div>
+                                    <div class="geo-km">${isTrulyForeign ? '~6,200 km' : 'same region'}</div>
                                 </div>
                                 <div class="geo-node">
-                                    <div class="geo-flag">\${flag}</div>
-                                    <div class="geo-city">\${regionLabel}</div>
+                                    <div class="geo-flag">${flag}</div>
+                                    <div class="geo-city">${regionLabel}</div>
                                     <div class="geo-role">Fares Agent</div>
                                 </div>
                             </div>
                             <div class="foreign-endpoint">
                                 <span>✅</span>
-                                <span class="ep-url">\${trace.endpoint}</span>
-                                \${isTrulyForeign ? '<span class="ans-badge foreign">🌍 FOREIGN</span>' : '<span class="ans-badge" style="background:#1a3a1a;color:#4ecdc4;border:1px solid #4ecdc4">🇺🇸 LOCAL</span>'}
+                                <span class="ep-url">${trace.endpoint}</span>
+                                ${isTrulyForeign ? '<span class="ans-badge foreign">🌍 FOREIGN</span>' : '<span class="ans-badge" style="background:#1a3a1a;color:#4ecdc4;border:1px solid #4ecdc4">🇺🇸 LOCAL</span>'}
                                 <span class="ans-badge live">🔴 LIVE</span>
                             </div>
-                            \${reason ? \`<div class="foreign-reason">💡 \${reason}</div>\` : ''}
-                        </div>\`;
+                            ${reason ? `<div class="foreign-reason">💡 ${reason}</div>` : ''}
+                        </div>`;
                     }).join('');
 
                     return localBlock + foreignBlock;
@@ -1968,7 +1968,14 @@ async def get_ui():
         "        window.ANS_DANS_DISPLAY = '" + _ans_dans_display + "';"
     )
     html_content = html_content.replace('        /*__ANS_VARS_PLACEHOLDER__*/', _ans_js)
-    return HTMLResponse(content=html_content)
+    return HTMLResponse(
+        content=html_content,
+        headers={
+            "Cache-Control": "no-cache, no-store, must-revalidate",
+            "Pragma": "no-cache",
+            "Expires": "0",
+        }
+    )
 
 @app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
