@@ -570,33 +570,86 @@ async def call_agent_slim(slim_client, config: AgentConfig, msg: str) -> Dict:
 
 
 async def call_agent_http(config: AgentConfig, msg: str, conv_id: str) -> Dict:
-    # If ANS returned a full proxy URL (e.g. http://97.107.132.213/dans/proxy/planner),
-    # use it directly — do not reconstruct from host + port which would lose the path.
-    # Append /a2a/message so the call lands on the agent's A2A endpoint via the proxy.
+    """
+    Call an agent over HTTP/A2A.
+
+    Supports two payload formats:
+    - Custom format  (alerts/planner/stopfinder): POST /a2a/message  {type, payload, metadata}
+    - Google A2A     (fares):                     POST /             {jsonrpc, method, params}
+
+    The format is selected from config.protocol_metadata["a2a"]["format"].
+    Defaults to "custom" for backward compatibility with existing agents.
+    """
+    import uuid as _uuid
+
+    # ── Determine endpoint path ────────────────────────────────────────────────
+    # Read path and format from protocol_metadata if available.
+    #
+    # DANS /resolve returns a flat dict for the selected protocol:
+    #   {"version": "0.2.1", "path": "/", "format": "google_a2a"}
+    #
+    # Agent registration may nest by protocol name:
+    #   {"a2a": {"version": "0.2.1", ...}, "http": {...}}
+    #
+    # Handle both by checking for the resolved protocol key first,
+    # then falling back to the flat dict.
+    _meta_path = ""
+    _proto_format = "custom"
+    if getattr(config, "protocol_metadata", None):
+        _pm = config.protocol_metadata
+        _proto_key = (getattr(config, "resolved_protocol", "") or "a2a").lower()
+        # Try nested format (e.g. {"a2a": {...}}) first; fall back to flat dict
+        _a2a_meta = _pm.get(_proto_key) or _pm
+        _meta_path    = _a2a_meta.get("path", "")
+        _proto_format = _a2a_meta.get("format", "custom")
+
     if getattr(config, 'full_proxy_url', ''):
-        url = config.full_proxy_url.rstrip('/') + "/a2a/message"
-        logger.info(f"📌 Using DANS proxy URL directly: {url}")
+        # ANS returned a DANS proxy URL — append the agent's declared path
+        _agent_path = _meta_path if _meta_path else "/a2a/message"
+        # Normalise: proxy URL already ends without slash; path must start with /
+        if not _agent_path.startswith("/"):
+            _agent_path = "/" + _agent_path
+        url = config.full_proxy_url.rstrip('/') + _agent_path
+        logger.info(f"📌 Using DANS proxy URL: {url} (format={_proto_format})")
     else:
-        # ANS resolves to SLIM ports (50051/52/53). HTTP REST lives on different ports.
-        # If this config was ANS-resolved, remap to the known HTTP REST port.
-        SLIM_TO_HTTP_PORT = {50051: 8001, 50052: 8002, 50053: 8003, 50054: 50054}  # fares serves on same port
+        # Non-ANS path — reconstruct from host + port
+        SLIM_TO_HTTP_PORT = {50051: 8001, 50052: 8002, 50053: 8003, 50054: 50054}
         actual_port = config.port
         if getattr(config, 'resolved_via_ans', False) and config.port in SLIM_TO_HTTP_PORT:
             actual_port = SLIM_TO_HTTP_PORT[config.port]
-            logger.info(f"📌 HTTP fallback: SLIM port {config.port} → HTTP REST port {actual_port}")
+            logger.info(f"📌 HTTP fallback: SLIM port {config.port} → HTTP port {actual_port}")
 
         scheme = config.url.split("://")[0] if "://" in config.url else "http"
         is_standard_port = (scheme == "https" and actual_port == 443) or (scheme == "http" and actual_port == 80)
-        if is_standard_port:
-            url = f"{config.url}/a2a/message"
-        else:
-            url = f"{config.url}:{actual_port}/a2a/message"
-    payload = {
-        "type": "request",
-        "payload": {"message": msg, "conversation_id": conv_id},
-        "metadata": {"source": "stategraph-v45"}
-    }
-    
+        _base = config.url if is_standard_port else f"{config.url}:{actual_port}"
+        _agent_path = _meta_path if _meta_path else "/a2a/message"
+        if not _agent_path.startswith("/"):
+            _agent_path = "/" + _agent_path
+        url = _base + _agent_path
+
+    # ── Build payload ──────────────────────────────────────────────────────────
+    if _proto_format == "google_a2a":
+        # Proper Google A2A JSON-RPC (used by fares agent and any real A2A agent)
+        payload = {
+            "jsonrpc": "2.0",
+            "method":  "message/send",
+            "params": {
+                "message": {
+                    "messageId": str(_uuid.uuid4()),
+                    "role":  "user",
+                    "parts": [{"type": "text", "text": msg}],
+                }
+            },
+            "id": 1,
+        }
+    else:
+        # Custom format used by alerts / planner / stopfinder
+        payload = {
+            "type": "request",
+            "payload": {"message": msg, "conversation_id": conv_id},
+            "metadata": {"source": "stategraph-v45"},
+        }
+
     async with httpx.AsyncClient(timeout=15.0) as client:
         r = await client.post(url, json=payload)
         # Firewall block — surface as a distinct sentinel, not a generic error
@@ -617,6 +670,16 @@ async def call_agent_http(config: AgentConfig, msg: str, conv_id: str) -> Dict:
         r.raise_for_status()
         result = r.json()
 
+        # ── Parse response ─────────────────────────────────────────────────────
+        if _proto_format == "google_a2a":
+            # Google A2A response: {jsonrpc, id, result: {kind, parts: [{type, text}]}}
+            _rparts = result.get("result", {}).get("parts", [])
+            _text = " ".join(
+                p.get("text", "") for p in _rparts if p.get("type") == "text" or p.get("kind") == "text"
+            )
+            return {"response": _text, "agent_used": config.name}
+
+        # Custom format response
         if result.get("type") == "response" and "payload" in result:
             return {"response": result["payload"].get("text", ""), "agent_used": config.name}
         return result

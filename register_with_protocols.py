@@ -55,8 +55,9 @@ AGENTS = [
         "endpoint": f"http://{FARES_HOST}:50054",
         "protocols": ["a2a", "http"],
         "protocol_metadata": {
-            "a2a":  {"version": "0.2.1", "path": "/a2a/message"},
-            "http": {"path": "/chat"},
+            # Fares is a real Google A2A agent — listens on / with JSON-RPC message/send
+            "a2a":  {"version": "0.2.1", "path": "/", "format": "google_a2a"},
+            "http": {"path": "/"},
         },
         "region": "us-east",
         "region_label": "Boston, MA",
