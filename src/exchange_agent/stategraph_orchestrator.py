@@ -1041,11 +1041,13 @@ async def execute_agents_node(state: AgentState) -> AgentState:
                         "affected_routes": [],
                         "severity_level": "none",
                         "alerts_domain_analysis": {},
+                        "ans_traces": ans_traces,   # ← was missing: ANS panel stayed blank for stop_info queries
                         "messages": [AIMessage(content=result.get("response", "")[:100], name=sf_id)]
                     }
                 except Exception as e:
                     logger.error(f"❌ stop_info StopFinder failed: {e}")
             return {**state, "agent_responses": [], "agents_called": [], "resolved_origin": "",
+                    "ans_traces": ans_traces,
                     "resolved_destination": "", "has_disruptions": False, "affected_routes": [],
                     "severity_level": "none", "alerts_domain_analysis": {}, "messages": []}
 
