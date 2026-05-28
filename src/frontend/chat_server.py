@@ -498,6 +498,12 @@ async def get_ui():
             color: #1a1a2e;
         }
 
+        .badge.firewall {
+            background: #e74c3c;
+            color: white;
+            animation: pulseBadge 1.5s infinite;
+        }
+
         .badge.override {
             background: #ffd93d;
             color: #1a1a2e;
@@ -1520,13 +1526,13 @@ async def get_ui():
 
                 if (data.type === 'response') {
                     addMessage('assistant', data.response);
-                    updateInternals(data.metadata);
-                    
+                    updateInternals(data.metadata, data.path);
+
                     // ✨ TRIGGER AGENT VISUALIZATION
                     if (window.triggerAgentAnimation && data.metadata) {
                         const unified = data.metadata.unified_decision || {};
                         window.triggerAgentAnimation({
-                            path: unified.path || data.metadata.path || 'a2a',
+                            path: data.path || unified.path || data.metadata.path || 'a2a',
                             agents_called: data.metadata.agents_called || [],
                             latency_ms: data.metadata.latency_ms || 0
                         });
@@ -1550,9 +1556,21 @@ async def get_ui():
                     const badge = document.getElementById('viz-think-badge');
                     if (d) d.style.animation = '';
                     if (badge) {
-                        badge.textContent = (data.path||'').toUpperCase();
+                        const p = data.path || '';
+                        if (p === 'firewall_block') {
+                            badge.textContent = '🛡️ BLOCKED';
+                            badge.style.background = '#e74c3c';
+                        } else if (p === 'mcp') {
+                            badge.textContent = 'MCP';
+                            badge.style.background = '#1a7f37';
+                        } else if (p === 'shortcut') {
+                            badge.textContent = 'SHORTCUT';
+                            badge.style.background = '#95e1d3';
+                        } else {
+                            badge.textContent = p.toUpperCase() || 'A2A';
+                            badge.style.background = '#6e40c9';
+                        }
                         badge.style.display = 'inline';
-                        badge.style.background = data.path==='mcp'?'#1a7f37':'#6e40c9';
                         badge.style.color = '#fff';
                     }
                 } else if (data.type === 'error') {
@@ -1745,10 +1763,10 @@ async def get_ui():
             addMessage('system', content);
         }
 
-        function updateInternals(metadata) {
+        function updateInternals(metadata, topLevelPath) {
             const internalsContent = document.getElementById('internalsContent');
-            
-            if (metadata.path === 'processing') {
+
+            if ((topLevelPath || metadata.path) === 'processing') {
                 internalsContent.innerHTML = `
                     <div class="info-block">
                         <div class="info-label">Status</div>
@@ -1759,11 +1777,11 @@ async def get_ui():
             }
 
             const unified = metadata.unified_decision || {};
-            const path = metadata.path || unified.path || 'unknown';
-            const intent = unified.intent || 'unknown';
-            const confidence = unified.confidence || 0;
+            const path = topLevelPath || metadata.path || unified.path || 'unknown';
+            const intent = unified.intent || (path === 'firewall_block' ? 'blocked' : 'unknown');
+            const confidence = unified.confidence || (path === 'firewall_block' ? 1 : 0);
             const latency = metadata.latency_ms || 0;
-            const reasoning = unified.reasoning || 'No reasoning provided';
+            const reasoning = unified.reasoning || (path === 'firewall_block' ? '🛡️ Blocked by DANS Firewall' : 'No reasoning provided');
             const agents = metadata.agents_called || [];
             const manualOverride = unified.manual_override || false;
             const forceProtocol = unified.force_protocol || 'auto';
@@ -1777,6 +1795,9 @@ async def get_ui():
             } else if (path === 'shortcut') {
                 badgeClass = 'shortcut';
                 badgeText = 'SHORTCUT';
+            } else if (path === 'firewall_block') {
+                badgeClass = 'firewall';
+                badgeText = '🛡️ BLOCKED';
             }
 
             const latencyPercent = Math.min((latency / 3000) * 100, 100);
@@ -1996,6 +2017,7 @@ async def websocket_endpoint(websocket: WebSocket):
                         'type': 'response',
                         'response': result['response'],
                         'conversation_id': conversation_id,
+                        'path': result.get('path', 'unknown'),
                         'metadata': result.get('metadata', {})
                     }, websocket)
                     
