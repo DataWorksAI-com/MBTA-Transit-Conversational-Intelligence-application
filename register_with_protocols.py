@@ -25,13 +25,14 @@ AGENTS = [
         "flag": "🇺🇸",
     },
     {
+        # Planner is a real Google A2A agent — serves JSON-RPC message/send on / (port 50052).
+        # It does NOT have a /a2a/message custom endpoint, so path must be "/" + google_a2a format.
         "label": "planner",
         "endpoint": f"http://{AGENT_HOST}:50052",
-        "protocols": ["a2a", "slim", "http"],
+        "protocols": ["a2a", "http"],
         "protocol_metadata": {
-            "a2a":  {"version": "0.2.1", "path": "/a2a/message"},
-            "slim": {"identity": "mbta-transit-ci/planner"},
-            "http": {"path": "/chat"},
+            "a2a":  {"version": "0.3.0", "path": "/", "format": "google_a2a"},
+            "http": {"path": "/"},
         },
         "region": "us-east",
         "region_label": "Boston, MA",
@@ -61,7 +62,20 @@ AGENTS = [
         },
         "region": "us-east",
         "region_label": "Boston, MA",
-        "flag": "🇺🇸",
+        "flag": "US",
+    },
+    {
+        # Frankfurt replica — same agent, same protocol, different region for failover
+        "label": "fares",
+        "endpoint": "http://85.90.246.180:50054",
+        "protocols": ["a2a", "http"],
+        "protocol_metadata": {
+            "a2a":  {"version": "0.2.1", "path": "/", "format": "google_a2a"},
+            "http": {"path": "/"},
+        },
+        "region": "eu-central",
+        "region_label": "Frankfurt, DE",
+        "flag": "DE",
     },
 ]
 

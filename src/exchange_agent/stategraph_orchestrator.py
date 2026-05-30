@@ -1396,14 +1396,21 @@ async def synthesize_node(state: AgentState) -> AgentState:
                 logger.info("✨ Fast-path synthesis: no disruptions, returning template")
                 return {**state, "final_response": final_no_disruption, "should_end": True}
 
-            # Active disruptions present — use LLM to intelligently combine
+            # Active disruptions present — use LLM to intelligently combine.
+            # Trip queries: LEAD with the route (the direct answer), then mention ONLY
+            # alerts that affect the lines/stations in that route. Unrelated system-wide
+            # alerts (e.g. a bus detour across town) are noise for a point-to-point trip.
             logger.info(f"✓ Combining alerts + planner via LLM (disruptions=True)")
-            # Compact prompt: every token saved = faster response
             prompt = (
-                f"Combine into 2-3 conversational sentences:\n"
-                f"Alerts: {alerts_text[:200]}\n"
-                f"Route: {planner_text[:300]}\n"
-                f"Mention the disruption, give a wait estimate if in alerts, then the route."
+                "A rider asked how to get from one place to another. Answer in 2-3 friendly sentences.\n\n"
+                f"THEIR ROUTE (this is the main answer — lead with it):\n{planner_text[:400]}\n\n"
+                f"CURRENT SYSTEM ALERTS (reference only):\n{alerts_text[:700]}\n\n"
+                "Rules:\n"
+                "1. Lead with the route — which line(s) to take and where.\n"
+                "2. Then mention ONLY alerts that affect the specific line(s)/stations in their route. "
+                "Give a wait estimate if one is stated.\n"
+                "3. If no alert affects their route, end with a short reassurance that their route is running normally.\n"
+                "4. Do NOT list unrelated alerts."
             )
 
             try:
