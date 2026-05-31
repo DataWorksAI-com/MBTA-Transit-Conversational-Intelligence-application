@@ -1373,6 +1373,19 @@ async def chat_endpoint(request: ChatRequest):
             metadata.update(a2a_metadata)
             metadata["fallback_reason"] = "MCP unavailable"
 
+        # Surface the orchestrator's REAL detected intent in the UI.
+        # A manual A2A override sets intent="general" up front, but the StateGraph
+        # orchestrator actually classifies the query (trip_planning / alerts / fares /
+        # stop_info). Show that instead of "general" so the panel reflects reality.
+        _sg_intent = metadata.get("stategraph_intent")
+        if _sg_intent and _sg_intent not in ("general", "unknown", None):
+            intent = _sg_intent
+            metadata["unified_decision"]["intent"] = _sg_intent
+            _sg_conf = metadata.get("stategraph_confidence")
+            if _sg_conf:
+                confidence = _sg_conf
+                metadata["unified_decision"]["confidence"] = _sg_conf
+
         latency_ms = int((time.time() - start_time) * 1000)
 
         root_span.set_attribute("path_taken", path_taken)

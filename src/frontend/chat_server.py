@@ -1778,10 +1778,16 @@ async def get_ui():
 
             const unified = metadata.unified_decision || {};
             const path = topLevelPath || metadata.path || unified.path || 'unknown';
-            const intent = unified.intent || (path === 'firewall_block' ? 'blocked' : 'unknown');
-            const confidence = unified.confidence || (path === 'firewall_block' ? 1 : 0);
+            // A blocked request is either a DANS proxy firewall block, or the app-level
+            // input guard refusing a pure prompt-injection / secret-grab.
+            const isBlocked = (path === 'firewall_block' || path === 'refused');
+            const blockReason = (metadata.reason === 'input_guard')
+                ? '🛡️ Blocked by input guard — prompt-injection / secret request refused'
+                : '🛡️ Blocked by DANS Firewall';
+            const intent = unified.intent || (isBlocked ? 'blocked' : 'unknown');
+            const confidence = unified.confidence || (isBlocked ? 1 : 0);
             const latency = metadata.latency_ms || 0;
-            const reasoning = unified.reasoning || (path === 'firewall_block' ? '🛡️ Blocked by DANS Firewall' : 'No reasoning provided');
+            const reasoning = unified.reasoning || (isBlocked ? blockReason : 'No reasoning provided');
             const agents = metadata.agents_called || [];
             const manualOverride = unified.manual_override || false;
             const forceProtocol = unified.force_protocol || 'auto';
@@ -1795,7 +1801,7 @@ async def get_ui():
             } else if (path === 'shortcut') {
                 badgeClass = 'shortcut';
                 badgeText = 'SHORTCUT';
-            } else if (path === 'firewall_block') {
+            } else if (isBlocked) {
                 badgeClass = 'firewall';
                 badgeText = '🛡️ BLOCKED';
             }
@@ -1810,6 +1816,15 @@ async def get_ui():
                         ${manualOverride ? '<span class="badge override">🔧 MANUAL OVERRIDE</span>' : ''}
                     </div>
                 </div>
+
+                ${isBlocked ? `
+                <div class="info-block">
+                    <div class="info-label">Security</div>
+                    <div class="info-value" style="color:#e74c3c; font-weight:600;">
+                        🛡️ Request blocked &mdash; ${metadata.reason === 'input_guard' ? 'input guard (prompt-injection / secret request)' : 'DANS firewall'}
+                    </div>
+                </div>
+                ` : ''}
 
                 ${manualOverride ? `
                 <div class="info-block">
