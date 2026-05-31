@@ -1044,6 +1044,60 @@ Provide a concise, natural language response that answers the user's question. B
 
 
 # ============================================================================
+# Application-level input guard (separate from the DANS agent-to-agent firewall)
+# ============================================================================
+# The DANS firewall protects agent->agent calls at the proxy layer. This guard is
+# the APPLICATION's own responsibility: it gives a clean refusal to chat inputs that
+# are PURELY prompt-injection or secret-extraction attempts.
+#
+# Design choice: only refuse *pure* attacks. If the message ALSO contains a real
+# transit request, we let it through — the orchestrator answers the legit part and
+# ignores the injection (helpful + safe). This preserves mixed-query behaviour.
+
+_INJECTION_PATTERNS = [
+    r"ignore\s+(all\s+|the\s+|your\s+)?(previous|prior|above)\b",
+    r"disregard\s+(all\s+|the\s+|your\s+)?(previous|prior|above|instructions)",
+    r"forget\s+(all\s+|your\s+|the\s+)?(previous|prior|instructions)",
+    r"system\s+prompt",
+    r"\byour\s+(instructions|prompt|initial\s+prompt|base\s+prompt|rules)\b",
+    r"reveal\s+your\s+(prompt|instructions|system)",
+    r"\bjailbreak\b",
+    r"developer\s+mode",
+]
+_SECRET_PATTERNS = [
+    r"\bapi[\s_-]?key\b",
+    r"\bsecret[\s_-]?key\b",
+    r"\baccess[\s_-]?token\b",
+    r"\bbearer[\s_-]?token\b",
+    r"\bpassword\b",
+    r"\bcredentials?\b",
+    r"\b(openai|anthropic)[\s_-]?key\b",
+    r"\b(env|environment)[\s_-]?(var|variable)",
+]
+# If any of these transit signals are present, treat the message as a real query
+# (answer it, ignore any injection) rather than refusing it outright.
+_TRANSIT_SIGNALS = [
+    "alert", "delay", "disrupt", "route", "stop", "station", "fare", "price",
+    "ticket", "line", "red line", "orange", "blue line", "green line", "silver",
+    "commuter", "train", "bus", "ferry", "subway", "trip", "go to", "get to",
+    " to ", "from ", "schedule", "arrival", "depart", "downtown", "airport",
+    "square", "street", "plan", "direction", "accessib", "wheelchair", "crossing",
+    "charliecard", "how do i get", "how much",
+]
+
+def _is_pure_input_attack(query: str) -> bool:
+    """True only when the message is essentially just an injection / secret grab
+    with no genuine transit request mixed in."""
+    ql = query.lower()
+    hit = (any(re.search(p, ql) for p in _INJECTION_PATTERNS)
+           or any(re.search(p, ql) for p in _SECRET_PATTERNS))
+    if not hit:
+        return False
+    has_transit = any(sig in ql for sig in _TRANSIT_SIGNALS)
+    return not has_transit
+
+
+# ============================================================================
 # MAIN CHAT ENDPOINT (with manual override support)
 # ============================================================================
 
@@ -1079,7 +1133,21 @@ async def chat_endpoint(request: ChatRequest):
         # Note: Firewall enforcement happens at the DANS proxy layer (agent-to-agent calls).
         # When the orchestrator calls agents via DANS proxy (/dans/proxy/<label>),
         # DANS checks the firewall before forwarding. That is the correct placement.
-        # Application-level input filtering is the responsibility of the application itself.
+        #
+        # Application-level input guard: refuse PURE prompt-injection / secret-grab inputs
+        # with a clean message. Mixed queries (real transit request + injection) are NOT
+        # refused — they flow through and the legit part is answered, injection ignored.
+        if _is_pure_input_attack(query):
+            logger.warning(f"🛡️ Input guard: refused pure injection/secret-grab | {query[:80]!r}")
+            return ChatResponse(
+                response=("I can only help with MBTA transit — I can't share internal prompts, "
+                          "API keys, or settings. Ask me about routes, alerts, stops, or fares."),
+                path="refused",
+                latency_ms=int((time.time() - start_time) * 1000),
+                intent="refused",
+                confidence=1.0,
+                metadata={"reason": "input_guard", "protocol": force_protocol},
+            )
 
         available_tools = []
         if mcp_client and mcp_client._initialized:
