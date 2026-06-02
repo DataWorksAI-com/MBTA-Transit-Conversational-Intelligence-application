@@ -1870,7 +1870,7 @@ async def get_ui():
 
                     const localBlock = localTraces.length ? `
                     <div class="ans-block">
-                        <div class="ans-title">🔍 ANS Dynamic Resolution</div>
+                        <div class="ans-title">🔍 DANS Dynamic Resolution</div>
                         ${localTraces.map(trace => {
                             const cachedBadge = trace.cached
                                 ? '<span class="ans-badge cached">⚡ CACHED</span>'
@@ -1901,11 +1901,11 @@ async def get_ui():
                         const reason      = trace.reason       || 'Geo-distributed foreign agent node';
                         const isTrulyForeign = trace.is_foreign === true;
                         const title = isTrulyForeign ? '🌐 Cross-Region Agent Call' : '🌐 Geo-Distributed Agent Call';
-                        const selectedBy = trace.selected_by || 'ans';
+                        const selectedBy = trace.selected_by || 'dans';
                         const selectionNote = selectedBy === 'lowest_latency'
-                            ? '⚡ Selected by ANS: lowest latency'
+                            ? '⚡ Selected by DANS: lowest latency'
                             : selectedBy === 'only_available' ? '📍 Only available endpoint'
-                            : '🔍 ANS resolved';
+                            : '🔍 DANS resolved';
                         // Candidate comparison rows
                         const candidates = trace.candidates || [];
                         const candidateRows = candidates.length > 0 ? candidates.map(c => {
@@ -1925,7 +1925,7 @@ async def get_ui():
                             <div class="foreign-urn">${trace.urn}</div>
                             ${candidates.length > 1 ? `
                             <div style="margin:8px 0 6px;font-size:10px;color:#a29bfe;font-weight:700;text-transform:uppercase;letter-spacing:.8px">
-                                ANS Candidate Selection
+                                DANS Candidate Selection
                             </div>
                             <div class="candidates-block">${candidateRows}</div>
                             <div style="font-size:10px;color:#4ecdc4;margin:6px 0">${selectionNote}</div>
