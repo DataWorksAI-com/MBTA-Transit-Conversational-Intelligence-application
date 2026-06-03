@@ -80,7 +80,22 @@ class ResolverClient:
     def __init__(self):
         self.resolver_url = os.getenv("ANS_RESOLVER_URL", "http://localhost:8200").rstrip("/")
         self.timeout = float(os.getenv("ANS_RESOLVER_TIMEOUT", "5.0"))
-        logger.info(f"ResolverClient initialized: {self.resolver_url}")
+        # Requester location sent to DANS so it returns the geographically nearest
+        # healthy endpoint (selected_by="geo_nearest") instead of just lowest-latency.
+        # Defaults to the MBTA deployment's home city; override with EXCHANGE_CITY,
+        # or pin exact coords with EXCHANGE_LAT / EXCHANGE_LON.
+        self.location = self._default_location()
+        logger.info(f"ResolverClient initialized: {self.resolver_url} (location={self.location})")
+
+    @staticmethod
+    def _default_location() -> dict:
+        lat, lon = os.getenv("EXCHANGE_LAT"), os.getenv("EXCHANGE_LON")
+        if lat and lon:
+            try:
+                return {"latitude": float(lat), "longitude": float(lon)}
+            except ValueError:
+                pass
+        return {"city": os.getenv("EXCHANGE_CITY", "Boston")}
 
     # Protocols this exchange agent can speak — passed to DANS so it can negotiate
     # the best match with the target agent's registered protocols.
@@ -106,6 +121,8 @@ class ResolverClient:
         ctx = dict(requester_context or {})
         if "protocols" not in ctx:
             ctx["protocols"] = self.CALLER_PROTOCOLS
+        if "location" not in ctx and self.location:
+            ctx["location"] = self.location
 
         t0 = _time.monotonic()
         try:
