@@ -67,6 +67,10 @@ class ResolvedAgent:
     negotiated_by: str          # "intersection" | "agent_default" | "fallback"
     fallback_protocol: str      # next best protocol if primary fails (or "")
     warning: str                # present when negotiated_by == "fallback" (or "")
+    # top-level resolve fields (NOT inside metadata) — needed for the UI trace
+    selected_by: str = ""       # geo_nearest | lowest_latency | only_available | *_fallback
+    region: str = ""            # region of the selected endpoint
+    flag: str = ""              # region flag emoji, if any
 
 
 class ResolverClient:
@@ -182,6 +186,9 @@ class ResolverClient:
             negotiated_by=negotiated_by,
             fallback_protocol=fallback_protocol,
             warning=warning,
+            selected_by=data.get("selected_by", ""),
+            region=data.get("region", ""),
+            flag=data.get("flag", ""),
         )
 
     async def health_check(self) -> bool:

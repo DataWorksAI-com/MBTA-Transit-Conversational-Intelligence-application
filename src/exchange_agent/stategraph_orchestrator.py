@@ -971,10 +971,10 @@ async def execute_agents_node(state: AgentState) -> AgentState:
                                 "cached": resolved.cached,
                                 "latency_ms": round(resolved.latency_ms, 1),
                                 "is_foreign": _is_foreign,
-                                "selected_by": _meta.get("selected_by", "ans"),
-                                "region": _meta.get("region", ""),
-                                "region_label": _meta.get("region_label", ""),
-                                "flag": _meta.get("flag", ""),
+                                "selected_by": getattr(resolved, "selected_by", "") or _meta.get("selected_by", "dans"),
+                                "region": getattr(resolved, "region", "") or _meta.get("region", ""),
+                                "region_label": getattr(resolved, "region", "") or _meta.get("region_label", ""),
+                                "flag": getattr(resolved, "flag", "") or _meta.get("flag", ""),
                                 "candidates": _meta.get("all_candidates", []),
                             }
                             ans_traces.append(_trace)
