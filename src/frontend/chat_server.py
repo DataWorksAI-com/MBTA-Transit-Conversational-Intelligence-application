@@ -1875,7 +1875,7 @@ async def get_ui():
                             const cachedBadge = trace.cached
                                 ? '<span class="ans-badge cached">⚡ CACHED</span>'
                                 : '<span class="ans-badge live">🔴 LIVE</span>';
-                            const latencyStr = trace.latency_ms > 0 ? trace.latency_ms + 'ms' : '';
+                            const latencyStr = trace.latency_ms > 0 ? 'resolve ' + Math.round(trace.latency_ms) + 'ms' : '';
                             return `
                             <div class="ans-agent-section">
                                 <div class="ans-urn">${trace.urn}</div>
