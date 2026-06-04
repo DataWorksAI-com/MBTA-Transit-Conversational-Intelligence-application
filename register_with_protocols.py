@@ -61,7 +61,8 @@ AGENTS = [
             "http": {"path": "/"},
         },
         "region": "us-east",
-        "region_label": "Boston, MA",
+        "region_label": "Newark, NJ",
+        "location": {"city": "Newark", "latitude": 40.7357, "longitude": -74.1724},
         "flag": "US",
     },
     {
@@ -75,6 +76,7 @@ AGENTS = [
         },
         "region": "eu-central",
         "region_label": "Frankfurt, DE",
+        "location": {"city": "Frankfurt", "latitude": 50.1109, "longitude": 8.6821},
         "flag": "DE",
     },
 ]
