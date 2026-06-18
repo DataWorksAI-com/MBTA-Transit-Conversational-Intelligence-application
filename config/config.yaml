@@ -1,0 +1,61 @@
+﻿project:
+  name: "MBTA Agntcy"
+  owner: "mani"
+  version: "1.0.0"
+
+exchange_agent:
+  host: "0.0.0.0"
+  port: 8100
+  llm:
+    provider: "openai"
+    model: "gpt-4o"
+    api_key: "${OPENAI_API_KEY}"
+    temperature: 0.7
+    max_tokens: 4096
+  
+  orchestration:
+    mbta_server_url: "http://localhost:8101"
+    timeout: 30
+    retry_attempts: 3
+
+mbta_orchestrator:
+  host: "0.0.0.0"
+  port: 8101
+  agent_registry:
+    type: "nanda"
+    url: "https://nanda.northeastern.systems"
+    namespace: "mbta-transit"
+  conversation:
+    max_history: 20
+    context_window: 5
+
+protocols:
+  a2a:
+    transport: "slim"
+    port: 9000
+  mcp:
+    enabled: true
+  rest:
+    enabled: true
+    cors_origins: ["*"]
+
+frontend:
+  host: "0.0.0.0"
+  port: 3000
+  api_url: "http://localhost:8100"
+
+database:
+  clickhouse:
+    host: "localhost"
+    port: 8123
+    database: "mbta_logs"
+    user: "default"
+    password: "clickhouse"
+
+observability:
+  otel:
+    enabled: true
+    collector_endpoint: "http://localhost:4317"
+  grafana:
+    enabled: true
+    url: "http://localhost:3001"

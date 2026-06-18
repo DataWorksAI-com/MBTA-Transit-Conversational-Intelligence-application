@@ -1,0 +1,70 @@
+version: '3.8'
+
+services:
+  jaeger:
+    image: jaegertracing/all-in-one:1.52
+    container_name: mbta-jaeger
+    restart: unless-stopped
+    ports:
+      - "16686:16686"  # Jaeger UI
+      - "14250:14250"  # gRPC receiver from OTEL Collector
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
+    networks:
+      - observability
+
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:0.91.0
+    container_name: mbta-otel-collector
+    restart: unless-stopped
+    ports:
+      - "0.0.0.0:4317:4317"   # OTLP gRPC - accept external connections
+      - "0.0.0.0:4318:4318"   # OTLP HTTP - accept external connections
+    command: ["--config=/etc/otel-collector-config.yaml"]
+    volumes:
+      - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml
+    depends_on:
+      - jaeger
+      - clickhouse
+    networks:
+      - observability
+
+  clickhouse:
+    image: clickhouse/clickhouse-server:23.12
+    container_name: mbta-clickhouse
+    restart: unless-stopped
+    ports:
+      - "0.0.0.0:8123:8123"   # HTTP interface - accept external connections
+      - "0.0.0.0:9000:9000"   # Native protocol - accept external connections
+    environment:
+      - CLICKHOUSE_USER=default
+      - CLICKHOUSE_PASSWORD=
+      - CLICKHOUSE_DB=mbta_metrics
+    volumes:
+      - clickhouse-data:/var/lib/clickhouse
+    networks:
+      - observability
+
+  grafana:
+    image: grafana/grafana:10.2.3
+    container_name: mbta-grafana
+    restart: unless-stopped
+    ports:
+      - "3001:3000"  # Grafana UI
+    environment:
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_INSTALL_PLUGINS=grafana-clickhouse-datasource
+    volumes:
+      - grafana-data:/var/lib/grafana
+    depends_on:
+      - clickhouse
+    networks:
+      - observability
+
+volumes:
+  clickhouse-data:
+  grafana-data:
+
+networks:
+  observability:
+    driver: bridge

@@ -1,0 +1,33 @@
+# MBTA Agent Configuration
+# Owner: mani
+
+agents:
+  # Alert Agent - Service disruptions and alerts
+  - name: "mbta-alerts"
+    type: "a2a"
+    service_url: "http://localhost:8001"  
+    capabilities:
+      - get_alerts
+      - get_service_status
+      - check_disruptions
+    description: "Real-time MBTA service alerts and disruptions"
+    
+  # Route Planner - Trip planning
+  - name: "mbta-route-planner"
+    type: "a2a"
+    service_url: "http://localhost:8002"  
+    capabilities:
+      - plan_trip
+      - get_route_options
+      - calculate_travel_time
+    description: "Multi-modal trip planning for MBTA"
+    
+  # Stop Finder - Station and stop information
+  - name: "mbta-stops"
+    type: "a2a"
+    service_url: "http://localhost:8003"  
+    capabilities:
+      - find_stops
+      - get_stop_details
+      - search_nearby_stops
+    description: "MBTA stop and station information"

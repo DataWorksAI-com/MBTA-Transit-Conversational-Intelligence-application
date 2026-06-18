@@ -1,0 +1,3 @@
+# Cisco AGNTCY SLIM transport — Python 3.12+ required
+slim-bindings==1.3.0
+agntcy-app-sdk==0.5.5

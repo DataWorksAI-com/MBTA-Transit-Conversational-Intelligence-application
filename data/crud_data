@@ -1,0 +1,243 @@
+LOADING SERVICE ALERTS DATA (2020-2023)
+================================================================================
+
+📂 2020: Found 12 monthly files
+   ✓ Loaded alerts_2020_01.csv: 20,878 alerts
+   ✓ Loaded alerts_2020_02.csv: 20,935 alerts
+   ✓ Loaded alerts_2020_03.csv: 21,317 alerts
+   ✓ Loaded alerts_2020_04.csv: 19,432 alerts
+   ✓ Loaded alerts_2020_05.csv: 22,714 alerts
+   ✓ Loaded alerts_2020_06.csv: 27,073 alerts
+   ✓ Loaded alerts_2020_07.csv: 24,517 alerts
+   ✓ Loaded alerts_2020_08.csv: 29,784 alerts
+   ✓ Loaded alerts_2020_09.csv: 28,833 alerts
+c:\Users\Manikandan\Desktop\mbta\scripts\analyze_all_alerts.py:39: DtypeWarning: Columns (0: recurrence_text, 1: facility_id) have mixed types. Specify dtype option on import or set low_memory=False.
+  df = pd.read_csv(file)
+   ✓ Loaded alerts_2020_10.csv: 33,247 alerts
+   ✓ Loaded alerts_2020_11.csv: 33,509 alerts
+c:\Users\Manikandan\Desktop\mbta\scripts\analyze_all_alerts.py:39: DtypeWarning: Columns (0: facility_id) have mixed types. Specify dtype option on import or set low_memory=False.
+  df = pd.read_csv(file)
+   ✓ Loaded alerts_2020_12.csv: 33,587 alerts
+📂 2021: Found 12 monthly files
+   ✓ Loaded alerts_2021_01.csv: 25,637 alerts
+   ✓ Loaded alerts_2021_02.csv: 27,367 alerts
+   ✓ Loaded alerts_2021_03.csv: 34,060 alerts
+   ✓ Loaded alerts_2021_04.csv: 32,052 alerts
+   ✓ Loaded alerts_2021_05.csv: 31,299 alerts
+   ✓ Loaded alerts_2021_06.csv: 30,267 alerts
+   ✓ Loaded alerts_2021_07.csv: 39,954 alerts
+   ✓ Loaded alerts_2021_08.csv: 49,087 alerts
+   ✓ Loaded alerts_2021_09.csv: 38,597 alerts
+   ✓ Loaded alerts_2021_10.csv: 48,819 alerts
+   ✓ Loaded alerts_2021_11.csv: 30,177 alerts
+   ✓ Loaded alerts_2021_12.csv: 24,375 alerts
+📂 2022: Found 12 monthly files
+   ✓ Loaded alerts_2022_01.csv: 27,541 alerts
+   ✓ Loaded alerts_2022_02.csv: 37,469 alerts
+   ✓ Loaded alerts_2022_03.csv: 43,834 alerts
+   ✓ Loaded alerts_2022_04.csv: 40,210 alerts
+   ✓ Loaded alerts_2022_05.csv: 46,376 alerts
+   ✓ Loaded alerts_2022_06.csv: 52,903 alerts
+   ✓ Loaded alerts_2022_07.csv: 51,188 alerts
+   ✓ Loaded alerts_2022_08.csv: 56,650 alerts
+   ✓ Loaded alerts_2022_09.csv: 50,516 alerts
+   ✓ Loaded alerts_2022_10.csv: 55,106 alerts
+c:\Users\Manikandan\Desktop\mbta\scripts\analyze_all_alerts.py:39: DtypeWarning: Columns (0: recurrence_text) have mixed types. Specify dtype option on import or set low_memory=False.
+  df = pd.read_csv(file)
+   ✓ Loaded alerts_2022_11.csv: 45,910 alerts
+   ✓ Loaded alerts_2022_12.csv: 42,262 alerts
+📂 2023: Found 12 monthly files
+   ✓ Loaded alerts_2023_01.csv: 38,478 alerts
+   ✓ Loaded alerts_2023_02.csv: 34,177 alerts
+   ✓ Loaded alerts_2023_03.csv: 32,402 alerts
+   ✓ Loaded alerts_2023_04.csv: 35,641 alerts
+   ✓ Loaded alerts_2023_05.csv: 47,623 alerts
+   ✓ Loaded alerts_2023_06.csv: 50,615 alerts
+   ✓ Loaded alerts_2023_07.csv: 58,716 alerts
+   ✓ Loaded alerts_2023_08.csv: 60,651 alerts
+   ✓ Loaded alerts_2023_09.csv: 53,627 alerts
+   ✓ Loaded alerts_2023_10.csv: 62,483 alerts
+   ✓ Loaded alerts_2023_11.csv: 60,391 alerts
+c:\Users\Manikandan\Desktop\mbta\scripts\analyze_all_alerts.py:39: DtypeWarning: Columns (0: closed_dt, 1: facility_id) have mixed types. Specify dtype option on import or set low_memory=False.
+  df = pd.read_csv(file)
+   ✓ Loaded alerts_2023_12.csv: 77,751 alerts
+
+✅ TOTAL: 1,890,037 alerts from 2020-2023
+
+================================================================================
+CALCULATING REAL DELAY DURATIONS
+================================================================================
+
+Converting datetime columns...
+Closed alerts: 403,338
+Active incidents (< 24 hrs): 385,698
+Subway incidents: 41,970
+
+================================================================================
+🎯 REAL DELAY PATTERNS BY CAUSE
+================================================================================
+
+TECHNICAL_PROBLEM:
+  Sample: 23,104 incidents
+  Average: 76.0 minutes
+  Median: 41.2 minutes
+  Range (25-75%): 25-74 minutes
+  Severity: critical
+
+UNKNOWN_CAUSE:
+  Sample: 12,061 incidents
+  Average: 103.4 minutes
+  Median: 34.8 minutes
+  Range (25-75%): 22-90 minutes
+  Severity: critical
+
+POLICE_ACTIVITY:
+  Sample: 2,393 incidents
+  Average: 45.1 minutes
+  Median: 33.6 minutes
+  Range (25-75%): 20-50 minutes
+  Severity: major
+
+MEDICAL_EMERGENCY:
+  Sample: 1,953 incidents
+  Average: 72.8 minutes
+  Median: 34.0 minutes
+  Range (25-75%): 23-63 minutes
+  Severity: critical
+
+ACCIDENT:
+  Sample: 1,047 incidents
+  Average: 62.8 minutes
+  Median: 40.5 minutes
+  Range (25-75%): 18-69 minutes
+  Severity: critical
+
+MAINTENANCE:
+  Sample: 976 incidents
+  Average: 151.7 minutes
+  Median: 46.1 minutes
+  Range (25-75%): 28-83 minutes
+  Severity: critical
+
+CONSTRUCTION:
+  Sample: 250 incidents
+  Average: 278.9 minutes
+  Median: 40.5 minutes
+  Range (25-75%): 1-194 minutes
+  Severity: critical
+
+WEATHER:
+  Sample: 149 incidents
+  Average: 298.8 minutes
+  Median: 269.0 minutes
+  Range (25-75%): 86-560 minutes
+  Severity: critical
+
+OTHER_CAUSE:
+  Sample: 37 incidents
+  Average: 552.5 minutes
+  Median: 747.0 minutes
+  Range (25-75%): 147-747 minutes
+  Severity: critical
+
+
+================================================================================
+📋 COPY THIS INTO YOUR ALERTS AGENT
+================================================================================
+
+# REAL DATA from MBTA Service Alerts 2020-2023
+# Calculated from actual incident resolution times
+# Source: https://gis.data.mass.gov/datasets/mbta-service-alerts-2020-2023
+
+DELAY_PATTERNS = {
+    "technical_problem": {
+        "min": 25,  # 25th percentile (faster resolution)
+        "max": 73,  # 75th percentile (slower resolution)
+        "avg": 76,  # Mean from 23104 incidents
+        "median": 41,  # Median duration
+        "severity": "critical",  # Based on duration
+        "sample_size": 23104,
+        "source": "MBTA Service Alerts 2020-2023 dataset",
+        "confidence": 0.95  # High - based on real measurements
+    },
+    "unknown": {
+        "min": 21,  # 25th percentile (faster resolution)
+        "max": 90,  # 75th percentile (slower resolution)
+        "avg": 103,  # Mean from 12061 incidents
+        "median": 34,  # Median duration
+        "severity": "critical",  # Based on duration
+        "sample_size": 12061,
+        "source": "MBTA Service Alerts 2020-2023 dataset",
+        "confidence": 0.95  # High - based on real measurements
+    },
+    "police_activity": {
+        "min": 20,  # 25th percentile (faster resolution)
+        "max": 50,  # 75th percentile (slower resolution)
+        "avg": 45,  # Mean from 2393 incidents
+        "median": 33,  # Median duration
+        "severity": "major",  # Based on duration
+        "sample_size": 2393,
+        "source": "MBTA Service Alerts 2020-2023 dataset",
+        "confidence": 0.95  # High - based on real measurements
+    },
+    "medical_emergency": {
+        "min": 23,  # 25th percentile (faster resolution)
+        "max": 63,  # 75th percentile (slower resolution)
+        "avg": 72,  # Mean from 1953 incidents
+        "median": 33,  # Median duration
+        "severity": "critical",  # Based on duration
+        "sample_size": 1953,
+        "source": "MBTA Service Alerts 2020-2023 dataset",
+        "confidence": 0.95  # High - based on real measurements
+    },
+    "accident": {
+        "min": 18,  # 25th percentile (faster resolution)
+        "max": 68,  # 75th percentile (slower resolution)
+        "avg": 62,  # Mean from 1047 incidents
+        "median": 40,  # Median duration
+        "severity": "critical",  # Based on duration
+        "sample_size": 1047,
+        "source": "MBTA Service Alerts 2020-2023 dataset",
+        "confidence": 0.95  # High - based on real measurements
+    },
+    "maintenance": {
+        "min": 28,  # 25th percentile (faster resolution)
+        "max": 82,  # 75th percentile (slower resolution)
+        "avg": 151,  # Mean from 976 incidents
+        "median": 46,  # Median duration
+        "severity": "critical",  # Based on duration
+        "sample_size": 976,
+        "source": "MBTA Service Alerts 2020-2023 dataset",
+        "confidence": 0.95  # High - based on real measurements
+    },
+    "construction": {
+        "min": 0,  # 25th percentile (faster resolution)
+        "max": 194,  # 75th percentile (slower resolution)
+        "avg": 278,  # Mean from 250 incidents
+        "median": 40,  # Median duration
+        "severity": "critical",  # Based on duration
+        "sample_size": 250,
+        "source": "MBTA Service Alerts 2020-2023 dataset",
+        "confidence": 0.95  # High - based on real measurements
+    },
+    "weather": {
+        "min": 86,  # 25th percentile (faster resolution)
+        "max": 559,  # 75th percentile (slower resolution)
+        "avg": 298,  # Mean from 149 incidents
+        "median": 268,  # Median duration
+        "severity": "critical",  # Based on duration
+        "sample_size": 149,
+        "source": "MBTA Service Alerts 2020-2023 dataset",
+        "confidence": 0.95  # High - based on real measurements
+    },
+    "other_cause": {
+        "min": 147,  # 25th percentile (faster resolution)
+        "max": 746,  # 75th percentile (slower resolution)
+        "avg": 552,  # Mean from 37 incidents
+        "median": 746,  # Median duration
+        "severity": "critical",  # Based on duration
+        "sample_size": 37,
+        "source": "MBTA Service Alerts 2020-2023 dataset",
+        "confidence": 0.95  # High - based on real measurements
+    },
+}

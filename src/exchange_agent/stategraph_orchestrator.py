@@ -650,7 +650,7 @@ async def call_agent_http(config: AgentConfig, msg: str, conv_id: str) -> Dict:
             "metadata": {"source": "stategraph-v45"},
         }
 
-    async with httpx.AsyncClient(timeout=15.0) as client:
+    async with httpx.AsyncClient(timeout=30.0) as client:
         r = await client.post(url, json=payload)
         # Firewall block — surface as a distinct sentinel, not a generic error
         if r.status_code == 403:

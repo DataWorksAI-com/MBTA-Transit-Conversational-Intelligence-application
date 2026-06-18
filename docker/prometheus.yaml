@@ -1,0 +1,53 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: 'otel-collector'
+    static_configs:
+      - targets: ['otel-collector:8889']
+  
+  - job_name: 'exchange-agent'
+    static_configs:
+      - targets: ['exchange-agent:8100']
+    metrics_path: '/metrics'
+  
+  - job_name: 'mbta-orchestrator'
+    static_configs:
+      - targets: ['mbta-orchestrator:8101']
+    metrics_path: '/metrics'
+```
+
+## 11. Requirements File
+
+**`requirements.txt`**
+```
+# Web frameworks
+fastapi==0.109.0
+uvicorn[standard]==0.27.0
+websockets==12.0
+
+# HTTP clients
+httpx==0.26.0
+aiohttp==3.9.1
+
+# AI/LLM
+anthropic==0.18.0
+
+# Data handling
+pydantic==2.5.3
+pyyaml==6.0.1
+
+# Database
+clickhouse-driver==0.2.6
+
+# Observability
+opentelemetry-api==1.22.0
+opentelemetry-sdk==1.22.0
+opentelemetry-exporter-otlp==1.22.0
+opentelemetry-instrumentation-fastapi==0.43b0
+opentelemetry-instrumentation-httpx==0.43b0
+
+# Utilities
+python-dotenv==1.0.0
+python-multipart==0.0.6

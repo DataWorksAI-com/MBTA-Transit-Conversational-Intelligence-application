@@ -1,0 +1,27 @@
+FROM python:3.11-slim
+
+WORKDIR /app
+
+# Install dependencies directly
+RUN pip install --no-cache-dir \
+    fastapi==0.109.0 \
+    uvicorn[standard]==0.27.0 \
+    httpx==0.26.0 \
+    pydantic==2.5.3 \
+    pyyaml==6.0.1 \
+    clickhouse-connect==0.7.0 \
+    opentelemetry-api==1.22.0 \
+    opentelemetry-sdk==1.22.0 \
+    opentelemetry-exporter-otlp==1.22.0 \
+    opentelemetry-instrumentation-fastapi==0.43b0 \
+    opentelemetry-instrumentation-httpx==0.43b0
+
+# Copy source code
+COPY src/ ./src/
+COPY config/ ./config/
+
+# Expose port
+EXPOSE 8101
+
+# Run the orchestrator
+CMD ["python", "-m", "uvicorn", "src.orchestrator.mbta_server:app", "--host", "0.0.0.0", "--port", "8101"]

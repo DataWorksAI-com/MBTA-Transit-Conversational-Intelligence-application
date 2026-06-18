@@ -1,0 +1,61 @@
+#!/bin/bash
+
+# Test MBTA Agntcy System
+# Owner: mani
+
+BASE_URL="http://localhost:8100"
+
+echo "🧪 Testing MBTA Agntcy System"
+echo "Owner: mani"
+echo ""
+
+# Test 1: General greeting (should be handled by LLM directly)
+echo "Test 1: General greeting"
+curl -X POST "$BASE_URL/chat" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "message": "Hello! How are you?",
+    "user_id": "test_user"
+  }' | jq .
+
+echo ""
+echo "---"
+echo ""
+
+# Test 2: MBTA query (should route to orchestrator)
+echo "Test 2: MBTA alerts query"
+curl -X POST "$BASE_URL/chat" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "message": "Are there any delays on the Red Line?",
+    "user_id": "test_user"
+  }' | jq .
+
+echo ""
+echo "---"
+echo ""
+
+# Test 3: Trip planning (should use multiple agents)
+echo "Test 3: Trip planning query"
+curl -X POST "$BASE_URL/chat" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "message": "How do I get from Harvard to MIT?",
+    "user_id": "test_user"
+  }' | jq .
+
+echo ""
+echo "---"
+echo ""
+
+# Test 4: Stop search
+echo "Test 4: Stop search query"
+curl -X POST "$BASE_URL/chat" \
+  -H "Content-Type: application/json" \
+  -d '{
+    "message": "Find stops near Kendall Square",
+    "user_id": "test_user"
+  }' | jq .
+
+echo ""
+echo "✅ Tests complete!"

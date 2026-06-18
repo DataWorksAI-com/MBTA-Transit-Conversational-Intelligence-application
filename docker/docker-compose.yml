@@ -1,0 +1,138 @@
+version: '3.8'
+
+services:
+  # Exchange Agent (LLM Orchestrator)
+  exchange-agent:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.exchange
+    container_name: mbta-exchange-agent
+    ports:
+      - "8100:8100"
+    environment:
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY}
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - ../config:/app/config:ro
+      - ../src:/app/src:ro
+    networks:
+      - mbta-network
+    depends_on:
+      - otel-collector
+    restart: unless-stopped
+
+  # MBTA Orchestrator
+  mbta-orchestrator:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.orchestrator
+    container_name: mbta-orchestrator
+    ports:
+      - "8101:8101"
+    environment:
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - ../config:/app/config:ro
+      - ../src:/app/src:ro
+    networks:
+      - mbta-network
+    depends_on:
+      - otel-collector
+      - clickhouse
+    restart: unless-stopped
+
+  # Frontend Chat UI
+  frontend:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile.frontend
+    container_name: mbta-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - PYTHONUNBUFFERED=1
+    volumes:
+      - ../src/frontend:/app/src/frontend:ro
+    networks:
+      - mbta-network
+    depends_on:
+      - exchange-agent
+    restart: unless-stopped
+
+  # OpenTelemetry Collector
+  otel-collector:
+    image: otel/opentelemetry-collector-contrib:latest
+    container_name: otel-collector
+    command: ["--config=/etc/otel-collector-config.yaml"]
+    volumes:
+      - ./otel-collector-config.yaml:/etc/otel-collector-config.yaml:ro
+    ports:
+      - "4317:4317"   # OTLP gRPC receiver
+      - "4318:4318"   # OTLP HTTP receiver
+      - "8888:8888"   # Prometheus metrics
+      - "8889:8889"   # Prometheus exporter
+    networks:
+      - mbta-network
+    restart: unless-stopped
+
+  # Grafana for observability
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    ports:
+      - "3001:3000"
+    environment:
+      - GF_SECURITY_ADMIN_USER=admin
+      - GF_SECURITY_ADMIN_PASSWORD=admin
+      - GF_INSTALL_PLUGINS=grafana-clickhouse-datasource
+    volumes:
+      - grafana-data:/var/lib/grafana
+      - ./grafana-dashboards:/etc/grafana/provisioning/dashboards:ro
+      - ./grafana-datasources.yaml:/etc/grafana/provisioning/datasources/datasources.yaml:ro
+    networks:
+      - mbta-network
+    depends_on:
+      - clickhouse
+    restart: unless-stopped
+
+  # ClickHouse for logs and analytics
+  clickhouse:
+    image: clickhouse/clickhouse-server:latest
+    container_name: clickhouse
+    ports:
+      - "8123:8123"   # HTTP
+      - "9000:9000"   # Native
+    environment:
+      - CLICKHOUSE_DB=mbta_logs
+      - CLICKHOUSE_USER=default
+      - CLICKHOUSE_PASSWORD=${CLICKHOUSE_PASSWORD:-clickhouse}
+    volumes:
+      - clickhouse-data:/var/lib/clickhouse
+    networks:
+      - mbta-network
+    restart: unless-stopped
+
+  # Prometheus (optional, for additional metrics)
+  prometheus:
+    image: prom/prometheus:latest
+    container_name: prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - prometheus-data:/prometheus
+    networks:
+      - mbta-network
+    restart: unless-stopped
+
+networks:
+  mbta-network:
+    driver: bridge
+
+volumes:
+  grafana-data:
+  clickhouse-data:
+  prometheus-data:

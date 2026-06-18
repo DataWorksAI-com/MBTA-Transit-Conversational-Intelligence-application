@@ -1,0 +1,25 @@
+resolver:
+  host: "0.0.0.0"
+  port: 8200
+
+# TLD Namespace Server endpoint (legacy GET-based, kept for backward compat)
+tld_ns_url: "http://localhost:6900/resolve/tld"
+
+# Namespace servers (POST-based, used by v2.0 resolver)
+namespaces:
+  agents.local:
+    url: "http://localhost:6900"
+    type: "local_registry"
+
+# Known valid TLDs
+known_tlds:
+  - "agents.local"
+
+timeouts:
+  ns_query_s: 10.0
+  auth_ns_s: 5.0
+
+cache:
+  enabled: true
+  default_ttl_s: 300
+  max_entries: 1000
